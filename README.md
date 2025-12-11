@@ -10,7 +10,7 @@
 4. **React JS**: Used for managing the database.
 5. **Minio**: Used for image storage.
 
-### Authors
+## Authors
 - [@Youmni Malha](https://github.com/Youmni)
 - [@Brent Vanroelen](https://github.com/brentvanroelen)
 - [@Wout Depeuter Malha](https://github.com/WoutDepeuter)
