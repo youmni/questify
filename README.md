@@ -12,6 +12,7 @@
 
 ## Sources
 https://chatgpt.com/share/697e208c-ec54-8007-8594-229b45a6bfd5 - setup react js en tailwind css
+https://chatgpt.com/share/697e2c11-6358-8007-8b85-c3ea725a8e8a - created ERD and models
 
 ## Authors
 - [@Youmni Malha](https://github.com/Youmni)
