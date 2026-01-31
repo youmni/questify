@@ -17,6 +17,8 @@ https://claude.ai/share/fc0d6b4f-18e6-45b7-8280-9ce1f40e6891 - Authentication
 
 https://chatgpt.com/share/697e369b-c918-8007-8681-47d6de6dfe00 - Docker setup
 
+https://claude.ai/share/fcce0eaf-3f37-44aa-bad7-21fd40e466a1 - Docker debug
+
 ## Authors
 - [@Youmni Malha](https://github.com/Youmni)
 - [@Brent Vanroelen](https://github.com/brentvanroelen)
