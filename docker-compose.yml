@@ -29,7 +29,7 @@ services:
       - db
     environment:
       PMA_HOST: db
-      PMA_PORT: 3310
+      PMA_PORT: 3306  
       PMA_USER: ${MYSQL_USER}
       PMA_PASSWORD: ${MYSQL_PASSWORD}
     ports:
