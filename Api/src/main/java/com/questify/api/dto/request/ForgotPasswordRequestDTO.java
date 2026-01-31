@@ -1,4 +1,4 @@
-package com.questify.api.dto;
+package com.questify.api.dto.request;
 
 import lombok.*;
 
