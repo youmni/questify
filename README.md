@@ -13,7 +13,7 @@
 ## Sources
 https://chatgpt.com/share/697e208c-ec54-8007-8594-229b45a6bfd5 - setup react js en tailwind css
 
-### Authors
+## Authors
 - [@Youmni Malha](https://github.com/Youmni)
 - [@Brent Vanroelen](https://github.com/brentvanroelen)
 - [@Wout Depeuter Malha](https://github.com/WoutDepeuter)
