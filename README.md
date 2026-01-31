@@ -15,6 +15,8 @@ https://chatgpt.com/share/697e208c-ec54-8007-8594-229b45a6bfd5 - setup react js 
 https://chatgpt.com/share/697e2c11-6358-8007-8b85-c3ea725a8e8a - created ERD and models
 https://claude.ai/share/fc0d6b4f-18e6-45b7-8280-9ce1f40e6891 - Authentication
 
+https://chatgpt.com/share/697e369b-c918-8007-8681-47d6de6dfe00 - Docker setup
+
 ## Authors
 - [@Youmni Malha](https://github.com/Youmni)
 - [@Brent Vanroelen](https://github.com/brentvanroelen)
