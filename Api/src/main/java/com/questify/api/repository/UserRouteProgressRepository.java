@@ -8,8 +8,18 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface UserRouteProgressRepository extends JpaRepository<UserRouteProgress, Long> {
-    Optional<UserRouteProgress> findByUserIdAndRouteId(Long userId, Long routeId);
-    List<UserRouteProgress> findByUserId(Long userId);
-    List<UserRouteProgress> findByUserIdAndIsCompleted(Long userId, boolean isCompleted);
+public interface UserRouteProgressRepository
+        extends JpaRepository<UserRouteProgress, Long> {
+
+    Optional<UserRouteProgress> findByUser_IdAndRoute_RouteId(
+            Long userId,
+            Long routeId
+    );
+
+    List<UserRouteProgress> findByUser_Id(Long userId);
+
+    List<UserRouteProgress> findByUser_IdAndIsCompleted(
+            Long userId,
+            boolean isCompleted
+    );
 }

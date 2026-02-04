@@ -1,0 +1,798 @@
+{
+  "info": {
+    "name": "Questify Admin API",
+    "description": "Complete API collection voor het beheren van musea, routes, schilderijen en route stops",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "YOUR_JWT_TOKEN_HERE",
+      "type": "string"
+    },
+    {
+      "key": "museumId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "routeId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "paintingId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "routeStopId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Museums",
+      "item": [
+        {
+          "name": "Get All Museums",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/museums",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "museums"]
+            }
+          }
+        },
+        {
+          "name": "Get Museum By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/museums/{{museumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "museums", "{{museumId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Museum - Rijksmuseum",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rijksmuseum Amsterdam\",\n  \"address\": \"Museumstraat 1, 1071 XX Amsterdam\",\n  \"description\": \"Het Rijksmuseum is een Nederlands nationaal museum gewijd aan kunst en geschiedenis in Amsterdam. Het museum werd geopend in 1885 en toont 8000 objecten uit de collectie.\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/museums",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "museums"]
+            }
+          }
+        },
+        {
+          "name": "Create Museum - Van Gogh",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Van Gogh Museum\",\n  \"address\": \"Museumplein 6, 1071 DJ Amsterdam\",\n  \"description\": \"Het Van Gogh Museum herbergt de grootste collectie kunstwerken van Vincent van Gogh.\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/museums",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "museums"]
+            }
+          }
+        },
+        {
+          "name": "Update Museum",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rijksmuseum Amsterdam - Nationaal Museum\",\n  \"address\": \"Museumstraat 1, 1071 XX Amsterdam, Nederland\",\n  \"description\": \"Het Rijksmuseum is een Nederlands nationaal museum gewijd aan kunst en geschiedenis.\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/museums/{{museumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "museums", "{{museumId}}"]
+            }
+          }
+        },
+        {
+          "name": "Activate Museum",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/museums/{{museumId}}/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "museums", "{{museumId}}", "activate"]
+            }
+          }
+        },
+        {
+          "name": "Deactivate Museum",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/museums/{{museumId}}/deactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "museums", "{{museumId}}", "deactivate"]
+            }
+          }
+        },
+        {
+          "name": "Delete Museum",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/museums/{{museumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "museums", "{{museumId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Paintings",
+      "item": [
+        {
+          "name": "Get All Paintings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/paintings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "paintings"]
+            }
+          }
+        },
+        {
+          "name": "Get Paintings By Museum",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/paintings/museum/{{museumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "paintings", "museum", "{{museumId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Painting By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/paintings/{{paintingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "paintings", "{{paintingId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Painting - De Nachtwacht",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"museumId\": 1,\n  \"title\": \"De Nachtwacht\",\n  \"artist\": \"Rembrandt van Rijn\",\n  \"year\": 1642,\n  \"museumLabel\": \"SK-C-5\",\n  \"imageRecognitionKey\": \"rijksmuseum-nachtwacht-sk-c-5\",\n  \"infoTitle\": \"Het meesterwerk van Rembrandt\",\n  \"infoText\": \"De Nachtwacht is het beroemdste schilderij van Rembrandt en één van de bekendste kunstwerken ter wereld.\",\n  \"externalLink\": \"https://www.rijksmuseum.nl/nl/collectie/SK-C-5\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/paintings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "paintings"]
+            }
+          }
+        },
+        {
+          "name": "Create Painting - Het Melkmeisje",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"museumId\": 1,\n  \"title\": \"Het Melkmeisje\",\n  \"artist\": \"Johannes Vermeer\",\n  \"year\": 1660,\n  \"museumLabel\": \"SK-A-2344\",\n  \"imageRecognitionKey\": \"rijksmuseum-melkmeisje-sk-a-2344\",\n  \"infoTitle\": \"Vermeer's iconisch genre stuk\",\n  \"infoText\": \"Het Melkmeisje is een schilderij van Johannes Vermeer. Het toont een dienstmeid die melk schenkt in een aardewerken kom.\",\n  \"externalLink\": \"https://www.rijksmuseum.nl/nl/collectie/SK-A-2344\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/paintings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "paintings"]
+            }
+          }
+        },
+        {
+          "name": "Create Painting - De Joodse Bruid",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"museumId\": 1,\n  \"title\": \"De Joodse Bruid\",\n  \"artist\": \"Rembrandt van Rijn\",\n  \"year\": 1665,\n  \"museumLabel\": \"SK-C-216\",\n  \"imageRecognitionKey\": \"rijksmuseum-joodse-bruid-sk-c-216\",\n  \"infoTitle\": \"Rembrandts meest intieme portret\",\n  \"infoText\": \"De Joodse bruid is een dubbelportret geschilderd door Rembrandt. Het werk wordt beschouwd als een van de mooiste liefdesschilderijen.\",\n  \"externalLink\": \"https://www.rijksmuseum.nl/nl/collectie/SK-C-216\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/paintings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "paintings"]
+            }
+          }
+        },
+        {
+          "name": "Create Painting - De Bedreigde Zwaan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"museumId\": 1,\n  \"title\": \"De Bedreigde Zwaan\",\n  \"artist\": \"Jan Asselijn\",\n  \"year\": 1650,\n  \"museumLabel\": \"SK-A-4\",\n  \"imageRecognitionKey\": \"rijksmuseum-bedreigde-zwaan-sk-a-4\",\n  \"infoTitle\": \"Het symbool van Nederlandse trots\",\n  \"infoText\": \"De Bedreigde Zwaan toont een zwaan die haar nest verdedigt tegen een hond. Een politieke allegorie.\",\n  \"externalLink\": \"https://www.rijksmuseum.nl/nl/collectie/SK-A-4\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/paintings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "paintings"]
+            }
+          }
+        },
+        {
+          "name": "Create Painting - Zelfportret Paulus",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"museumId\": 1,\n  \"title\": \"Zelfportret als Apostel Paulus\",\n  \"artist\": \"Rembrandt van Rijn\",\n  \"year\": 1661,\n  \"museumLabel\": \"SK-A-4050\",\n  \"imageRecognitionKey\": \"rijksmuseum-zelfportret-paulus-sk-a-4050\",\n  \"infoTitle\": \"Rembrandt in religieuze rol\",\n  \"infoText\": \"In dit zelfportret stelt Rembrandt zichzelf voor als de apostel Paulus.\",\n  \"externalLink\": \"https://www.rijksmuseum.nl/nl/collectie/SK-A-4050\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/paintings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "paintings"]
+            }
+          }
+        },
+        {
+          "name": "Update Painting",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"De Nachtwacht (Updated)\",\n  \"artist\": \"Rembrandt Harmenszoon van Rijn\",\n  \"year\": 1642,\n  \"museumLabel\": \"SK-C-5\",\n  \"imageRecognitionKey\": \"rijksmuseum-nachtwacht-sk-c-5\",\n  \"infoTitle\": \"Het meesterwerk van Rembrandt - Updated\",\n  \"infoText\": \"Updated info text\",\n  \"externalLink\": \"https://www.rijksmuseum.nl/nl/collectie/SK-C-5\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/paintings/{{paintingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "paintings", "{{paintingId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Painting",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/paintings/{{paintingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "paintings", "{{paintingId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Routes",
+      "item": [
+        {
+          "name": "Get All Routes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/routes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "routes"]
+            }
+          }
+        },
+        {
+          "name": "Get Routes By Museum",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/routes/museum/{{museumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "routes", "museum", "{{museumId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Route By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/routes/{{routeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "routes", "{{routeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Route - Gouden Eeuw",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"museumId\": 1,\n  \"name\": \"Gouden Eeuw Hoogtepunten\",\n  \"description\": \"Een tour langs de beroemdste meesterwerken uit de Nederlandse Gouden Eeuw. Deze route voert je langs iconische werken van Rembrandt en Vermeer.\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/routes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "routes"]
+            }
+          }
+        },
+        {
+          "name": "Create Route - Rembrandt Special",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"museumId\": 1,\n  \"name\": \"Rembrandt Special\",\n  \"description\": \"Focus op de meesterwerken van Rembrandt van Rijn. Ontdek zijn ontwikkeling als kunstenaar.\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/routes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "routes"]
+            }
+          }
+        },
+        {
+          "name": "Update Route",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Gouden Eeuw Meesterwerken\",\n  \"description\": \"Ontdek de hoogtepunten van de Nederlandse Gouden Eeuw in 45 minuten.\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/routes/{{routeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "routes", "{{routeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Activate Route",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/routes/{{routeId}}/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "routes", "{{routeId}}", "activate"]
+            }
+          }
+        },
+        {
+          "name": "Deactivate Route",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/routes/{{routeId}}/deactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "routes", "{{routeId}}", "deactivate"]
+            }
+          }
+        },
+        {
+          "name": "Delete Route",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/routes/{{routeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "routes", "{{routeId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Route Stops",
+      "item": [
+        {
+          "name": "Get Route Stops",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/route-stops/route/{{routeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "route-stops", "route", "{{routeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Add Stop - De Nachtwacht",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paintingId\": 1,\n  \"sequenceNumber\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/route-stops/route/{{routeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "route-stops", "route", "{{routeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Add Stop - Het Melkmeisje",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paintingId\": 2,\n  \"sequenceNumber\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/route-stops/route/{{routeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "route-stops", "route", "{{routeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Add Stop - De Joodse Bruid",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paintingId\": 3,\n  \"sequenceNumber\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/route-stops/route/{{routeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "route-stops", "route", "{{routeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Add Stop - De Bedreigde Zwaan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paintingId\": 4,\n  \"sequenceNumber\": 4\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/route-stops/route/{{routeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "route-stops", "route", "{{routeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Stop Sequence",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/route-stops/{{routeStopId}}/sequence?sequenceNumber=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "route-stops", "{{routeStopId}}", "sequence"],
+              "query": [
+                {
+                  "key": "sequenceNumber",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reorder Stops",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[4, 1, 3, 2]"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/route-stops/route/{{routeId}}/reorder",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "route-stops", "route", "{{routeId}}", "reorder"]
+            }
+          }
+        },
+        {
+          "name": "Delete Route Stop",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/route-stops/{{routeStopId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "route-stops", "{{routeStopId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -56,7 +56,7 @@ public class PaintingVerificationService {
             }
 
             // Check if painting already scanned
-            boolean alreadyScanned = scanRepository.existsByUserIdAndPaintingIdAndRouteId(
+            boolean alreadyScanned = scanRepository.existsByUser_IdAndPainting_PaintingIdAndRoute_RouteId(
                     userId, paintingId, routeId
             );
 

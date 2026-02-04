@@ -21,7 +21,6 @@ public class RouteProgressService {
     private final UserPaintingScanRepository scanRepository;
     private final RouteRepository routeRepository;
     private final UserRepository userRepository;
-    private final MuseumService museumService;
 
     /**
      * Get or create user's progress for a route
@@ -30,7 +29,8 @@ public class RouteProgressService {
     @Transactional
     public RouteProgressDTO getOrCreateProgress(Long userId, Long routeId) {
 
-        Optional<UserRouteProgress> existing = progressRepository.findByUserIdAndRouteId(userId, routeId);
+        // ✅ Updated method
+        Optional<UserRouteProgress> existing = progressRepository.findByUser_IdAndRoute_RouteId(userId, routeId);
 
         if (existing.isPresent()) {
             return buildProgressDTO(existing.get());
@@ -63,7 +63,8 @@ public class RouteProgressService {
     @Transactional
     public RouteProgressDTO advanceToNextStop(Long userId, Long routeId) {
 
-        UserRouteProgress progress = progressRepository.findByUserIdAndRouteId(userId, routeId)
+        // ✅ Updated method
+        UserRouteProgress progress = progressRepository.findByUser_IdAndRoute_RouteId(userId, routeId)
                 .orElseThrow(() -> new RuntimeException("Progress not found"));
 
         Route route = routeRepository.findByIdWithStops(routeId)
@@ -93,7 +94,8 @@ public class RouteProgressService {
      */
     @Transactional(readOnly = true)
     public List<RouteProgressDTO> getUserProgress(Long userId) {
-        return progressRepository.findByUserId(userId).stream()
+        // ✅ Updated method
+        return progressRepository.findByUser_Id(userId).stream()
                 .map(this::buildProgressDTO)
                 .toList();
     }

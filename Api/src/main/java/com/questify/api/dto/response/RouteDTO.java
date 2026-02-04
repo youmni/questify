@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RouteDTO {
     private Long routeId;
+    private Long museumId;
     private String name;
     private String description;
     private boolean isActive;

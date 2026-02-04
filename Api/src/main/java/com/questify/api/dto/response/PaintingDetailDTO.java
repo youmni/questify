@@ -10,10 +10,12 @@ import java.util.List;
 @AllArgsConstructor
 public class PaintingDetailDTO {
     private Long paintingId;
+    private Long museumId;
     private String title;
     private String artist;
     private Integer year;
     private String museumLabel;
+    private String imageRecognitionKey;
     private String infoTitle;
     private String infoText;
     private String externalLink;
