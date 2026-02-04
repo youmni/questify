@@ -135,6 +135,13 @@ public class RouteStopAdminService {
                 .routeId(routeStop.getRoute().getRouteId())
                 .paintingId(routeStop.getPainting().getPaintingId())
                 .sequenceNumber(routeStop.getSequenceNumber())
+                .painting(com.questify.api.dto.response.PaintingBasicDTO.builder()
+                        .paintingId(routeStop.getPainting().getPaintingId())
+                        .title(routeStop.getPainting().getTitle())
+                        .artist(routeStop.getPainting().getArtist())
+                        .year(routeStop.getPainting().getYear())
+                        .museumLabel(routeStop.getPainting().getMuseumLabel())
+                        .build())
                 .build();
     }
 }

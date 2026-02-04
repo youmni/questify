@@ -106,11 +106,7 @@ public class RouteAdminService {
 
     private RouteDTO convertToDTO(Route route) {
         List<RouteStopDTO> stops = route.getStops().stream()
-                .map(stop -> RouteStopDTO.builder()
-                        .routeStopId(stop.getRouteStopId())
-                        .paintingId(stop.getPainting().getPaintingId())
-                        .sequenceNumber(stop.getSequenceNumber())
-                        .build())
+                .map(this::convertStopToDTO)
                 .collect(Collectors.toList());
 
         return RouteDTO.builder()
@@ -119,7 +115,24 @@ public class RouteAdminService {
                 .name(route.getName())
                 .description(route.getDescription())
                 .isActive(route.isActive())
+                .totalStops(stops.size())
                 .stops(stops)
+                .build();
+    }
+
+    private RouteStopDTO convertStopToDTO(com.questify.api.model.RouteStop stop) {
+        return RouteStopDTO.builder()
+                .routeStopId(stop.getRouteStopId())
+                .routeId(stop.getRoute().getRouteId())
+                .paintingId(stop.getPainting().getPaintingId())
+                .sequenceNumber(stop.getSequenceNumber())
+                .painting(com.questify.api.dto.response.PaintingBasicDTO.builder()
+                        .paintingId(stop.getPainting().getPaintingId())
+                        .title(stop.getPainting().getTitle())
+                        .artist(stop.getPainting().getArtist())
+                        .year(stop.getPainting().getYear())
+                        .museumLabel(stop.getPainting().getMuseumLabel())
+                        .build())
                 .build();
     }
 }
