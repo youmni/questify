@@ -86,10 +86,9 @@
 
         <!-- Source: https://mvnrepository.com/artifact/org.opencv/opencv -->
         <dependency>
-            <groupId>org.opencv</groupId>
+            <groupId>org.openpnp</groupId>
             <artifactId>opencv</artifactId>
-            <version>4.9.0</version>
-            <scope>compile</scope>
+            <version>4.9.0-0</version>
         </dependency>
 
         <!-- MinIO Client voor image storage -->
