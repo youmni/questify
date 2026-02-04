@@ -84,6 +84,28 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Source: https://mvnrepository.com/artifact/org.opencv/opencv -->
+        <dependency>
+            <groupId>org.opencv</groupId>
+            <artifactId>opencv</artifactId>
+            <version>4.9.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- MinIO Client voor image storage -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.5.7</version>
+        </dependency>
+
+        <!-- Apache Commons voor file utilities -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.15.1</version>
+        </dependency>
+
         <!-- Mail -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
