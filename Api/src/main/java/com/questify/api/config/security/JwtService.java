@@ -25,7 +25,7 @@ public class JwtService {
     public String generateToken(long id, UserType role) {
         try {
             Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.MINUTE, 2);
+            cal.add(Calendar.MINUTE, 60);
 
             JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                     .subject(String.valueOf(id))
