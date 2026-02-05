@@ -6,6 +6,8 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "museums")
@@ -35,10 +37,9 @@ public class Museum {
     @Builder.Default
     private boolean isActive = true;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "museum", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Route> routes = new ArrayList<>();
+    @OneToMany(mappedBy = "museum", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Route> routes = new HashSet<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "museum", cascade = CascadeType.ALL, orphanRemoval = true)
