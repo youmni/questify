@@ -22,7 +22,7 @@ const QuestPage = () => {
         </div>
 
         <div className="w-full mt-8 flex justify-center">
-          <StartQuestButton onClick={() => console.log("Quest Started!")} />
+          <StartQuestButton />
         </div>
         
       </div>
