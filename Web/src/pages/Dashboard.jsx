@@ -5,21 +5,27 @@ const Dashboard = () => {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
+    <div className="min-h-screen bg-[#f4f1e9] text-[#2c3e54]">
+      <nav className="bg-white shadow-sm border-b border-[#2c3e54]/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold">My App</h1>
-            </div>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-700">
+              <h1 className="text-xl font-bold tracking-wider">QUESTIFY</h1>
+              <Link
+                to="/quest"
+                className="text-sm text-[#2c3e54] hover:underline"
+              >
+                Start speurtocht
+              </Link>
+            </div>
+            <div className="flex items-center space-x-4 text-sm">
+              <span className="text-[#2c3e54]">
                 {user?.firstName} {user?.lastName}
               </span>
               {user?.userType === 'ADMIN' && (
                 <Link
                   to="/admin"
-                  className="text-blue-600 hover:text-blue-800"
+                  className="text-[#2c3e54] font-semibold hover:underline"
                 >
                   Admin Panel
                 </Link>

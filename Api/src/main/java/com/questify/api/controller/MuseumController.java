@@ -49,4 +49,14 @@ public class MuseumController {
     ) {
         return ResponseEntity.ok(museumService.getRouteDetails(routeId));
     }
+
+    /**
+     * GET /api/museums/paintings/{paintingId}
+     * Get painting details including hints for authenticated users.
+     */
+    @AllowAuthenticated
+    @GetMapping("/paintings/{paintingId}")
+    public ResponseEntity<PaintingDetailDTO> getPaintingDetails(@PathVariable Long paintingId) {
+        return ResponseEntity.ok(museumService.getPaintingDetails(paintingId));
+    }
 }

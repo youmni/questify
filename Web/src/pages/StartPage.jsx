@@ -1,12 +1,18 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import QuestifyIcon from '../components/startPage/QuestifyIcon';
 import TextHeader from '../components/startPage/TextHeader';
 import HowItWorks from '../components/startPage/HowItWorks';
 import StartQuestButton from '../components/startPage/StartQuestButton';
 
 const QuestPage = () => {
+  const navigate = useNavigate();
+
+  const handleStart = () => {
+    navigate('/quest/museums');
+  };
   return (
-    <div className="min-h-screen bg-neutral-100 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-[#f4f1e9] text-[#2c3e54] flex flex-col items-center justify-center p-6">
       
       <div className="w-full max-w-md flex flex-col items-center text-center">
         
@@ -22,7 +28,7 @@ const QuestPage = () => {
         </div>
 
         <div className="w-full mt-8 flex justify-center">
-          <StartQuestButton />
+          <StartQuestButton onClick={handleStart} />
         </div>
         
       </div>
