@@ -28,7 +28,7 @@ const PaintingsAdmin = () => {
       const res = await paintingAdminService.getAll();
       setPaintings(res.data || []);
     } catch (e) {
-      setError("Failed to load paintings");
+      setError("Laden van schilderijen mislukt: " + e.message);
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,7 @@ const PaintingsAdmin = () => {
       setEditingId(null);
       await loadPaintings();
     } catch (e) {
-      setError("Failed to save painting");
+      setError("Opslaan van schilderij mislukt: " + e.message);
     } finally {
       setLoading(false);
     }
@@ -93,14 +93,14 @@ const PaintingsAdmin = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this painting?")) return;
+    if (!window.confirm("Weet je zeker dat je dit schilderij wilt verwijderen?")) return;
     setLoading(true);
     setError("");
     try {
       await paintingAdminService.remove(id);
       await loadPaintings();
     } catch (e) {
-      setError("Failed to delete painting");
+      setError("Verwijderen van schilderij mislukt: " + e.message);
     } finally {
       setLoading(false);
     }
@@ -115,7 +115,7 @@ const PaintingsAdmin = () => {
     <div className="min-h-screen bg-[#f4f1e9] text-[#2c3e54]">
       <nav className="bg-white shadow-sm border-b border-[#2c3e54]/10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
-          <h1 className="text-xl font-bold text-[#2c3e54]">Paintings Management</h1>
+          <h1 className="text-xl font-bold text-[#2c3e54]">Schilderijbeheer</h1>
           <div className="flex items-center space-x-4">
             <Link to="/admin" className="text-sm text-[#2c3e54] hover:underline">
               Admin Home
@@ -132,7 +132,7 @@ const PaintingsAdmin = () => {
           
           <section className="lg:col-span-1 bg-white rounded-lg shadow p-4 border border-[#2c3e54]/10 h-fit">
             <h2 className="text-lg font-semibold mb-4 text-[#2c3e54]">
-              {editingId ? "Edit Painting" : "Create Painting"}
+              {editingId ? "Schilderij Bewerken" : "Schilderij Aanmaken"}
             </h2>
             {error && (
               <p className="mb-2 text-sm text-red-600">{error}</p>
@@ -150,7 +150,7 @@ const PaintingsAdmin = () => {
                 />
               </div>
               <div>
-                <label className="block font-medium text-[#2c3e54]">Title</label>
+                <label className="block font-medium text-[#2c3e54]">Titel</label>
                 <input
                   type="text"
                   name="title"
@@ -161,7 +161,7 @@ const PaintingsAdmin = () => {
                 />
               </div>
               <div>
-                <label className="block font-medium text-[#2c3e54]">Artist</label>
+                <label className="block font-medium text-[#2c3e54]">Artiest</label>
                 <input
                   type="text"
                   name="artist"
@@ -171,7 +171,7 @@ const PaintingsAdmin = () => {
                 />
               </div>
               <div>
-                <label className="block font-medium text-[#2c3e54]">Year</label>
+                <label className="block font-medium text-[#2c3e54]">Jaar</label>
                 <input
                   type="number"
                   name="year"
@@ -182,7 +182,7 @@ const PaintingsAdmin = () => {
               </div>
               <div>
                 <label className="block font-medium text-[#2c3e54]">
-                  Museum Label
+                  Museumlabel
                 </label>
                 <input
                   type="text"
@@ -194,7 +194,7 @@ const PaintingsAdmin = () => {
               </div>
               <div>
                 <label className="block font-medium text-[#2c3e54]">
-                  Image Recognition Key
+                  Beeldherkenningssleutel (Key)
                 </label>
                 <input
                   type="text"
@@ -205,7 +205,7 @@ const PaintingsAdmin = () => {
                 />
               </div>
               <div>
-                <label className="block font-medium text-[#2c3e54]">Info Title</label>
+                <label className="block font-medium text-[#2c3e54]">Info Titel</label>
                 <input
                   type="text"
                   name="infoTitle"
@@ -215,7 +215,7 @@ const PaintingsAdmin = () => {
                 />
               </div>
               <div>
-                <label className="block font-medium text-[#2c3e54]">Info Text</label>
+                <label className="block font-medium text-[#2c3e54]">Info Tekst</label>
                 <textarea
                   name="infoText"
                   value={form.infoText}
@@ -226,7 +226,7 @@ const PaintingsAdmin = () => {
               </div>
               <div>
                 <label className="block font-medium text-[#2c3e54]">
-                  External Link
+                  Externe Link
                 </label>
                 <input
                   type="url"
@@ -242,7 +242,7 @@ const PaintingsAdmin = () => {
                   disabled={loading}
                   className="block w-full text-center px-3 py-2 rounded-md border border-cyan-900 text-cyan-950 text-sm font-medium hover:bg-cyan-900 hover:text-white transition-colors disabled:opacity-50"
                 >
-                  {editingId ? "Save changes" : "Create"}
+                  {editingId ? "Wijzigingen opslaan" : "Aanmaken"}
                 </button>
                 {editingId && (
                   <button
@@ -250,7 +250,7 @@ const PaintingsAdmin = () => {
                     onClick={handleCancelEdit}
                     className="block w-full text-center px-3 py-2 rounded-md border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
                   >
-                    Cancel
+                    Annuleren
                   </button>
                 )}
               </div>
@@ -259,22 +259,22 @@ const PaintingsAdmin = () => {
 
           <section className="lg:col-span-2 bg-white rounded-lg shadow p-4 border border-[#2c3e54]/10">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-[#2c3e54]">All Paintings</h2>
+              <h2 className="text-lg font-semibold text-[#2c3e54]">Alle Schilderijen</h2>
               <button
                 type="button"
                 onClick={loadPaintings}
                 disabled={loading}
                 className="px-3 py-1 text-xs rounded bg-[#f4f1e9] text-[#2c3e54] hover:bg-[#ebe8de] transition-colors disabled:opacity-50"
               >
-                Refresh
+                Vernieuwen
               </button>
             </div>
             
             {loading && (
-              <p className="text-sm text-[#2c3e54]/70">Loading...</p>
+              <p className="text-sm text-[#2c3e54]/70">Laden...</p>
             )}
             {!loading && paintings.length === 0 && (
-              <p className="text-sm text-[#2c3e54]/70">No paintings found.</p>
+              <p className="text-sm text-[#2c3e54]/70">Geen schilderijen gevonden.</p>
             )}
 
             <div className="overflow-x-auto">
@@ -282,11 +282,11 @@ const PaintingsAdmin = () => {
                 <thead>
                   <tr className="text-[#2c3e54]/50">
                     <th className="px-2 py-2 text-left font-medium">ID</th>
-                    <th className="px-2 py-2 text-left font-medium">Museum ID</th>
-                    <th className="px-2 py-2 text-left font-medium">Title</th>
-                    <th className="px-2 py-2 text-left font-medium">Artist</th>
+                    <th className="px-2 py-2 text-left font-medium">Mus. ID</th>
+                    <th className="px-2 py-2 text-left font-medium">Titel</th>
+                    <th className="px-2 py-2 text-left font-medium">Artiest</th>
                     <th className="px-2 py-2 text-left font-medium">Label</th>
-                    <th className="px-2 py-2 text-right font-medium">Actions</th>
+                    <th className="px-2 py-2 text-right font-medium">Acties</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#2c3e54]/10">
@@ -302,13 +302,13 @@ const PaintingsAdmin = () => {
                           onClick={() => handleEdit(p)}
                           className="text-blue-600 hover:underline font-medium"
                         >
-                          Edit
+                          Bewerken
                         </button>
                         <button
                           onClick={() => handleDelete(p.paintingId)}
                           className="text-red-600 hover:underline font-medium"
                         >
-                          Delete
+                          Verwijderen
                         </button>
                       </td>
                     </tr>

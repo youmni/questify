@@ -24,7 +24,7 @@ const RouteStopsAdmin = () => {
       setStops(res.data || []);
       setRouteId(id);
     } catch (e) {
-      setError("Failed to load route stops");
+      setError("Laden van route-stops mislukt: " + e.message);
     } finally {
       setLoading(false);
     }
@@ -61,21 +61,21 @@ const RouteStopsAdmin = () => {
       setForm((prev) => ({ ...prev, paintingId: "", sequenceNumber: "" }));
       await loadStops(routeId);
     } catch (e) {
-      setError("Failed to add stop");
+      setError("Toevoegen van stop mislukt: " + e.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteStop = async (stopId) => {
-    if (!window.confirm("Delete this stop from route?")) return;
+    if (!window.confirm("Deze stop uit de route verwijderen?")) return;
     setLoading(true);
     setError("");
     try {
       await routeStopAdminService.remove(stopId);
       await loadStops(routeId);
     } catch (e) {
-      setError("Failed to delete stop");
+      setError("Verwijderen van stop mislukt: " + e.message);
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ const RouteStopsAdmin = () => {
       await routeStopAdminService.updateSequence(stop.routeStopId, next);
       await loadStops(routeId);
     } catch (e) {
-      setError("Failed to update sequence");
+      setError("Bijwerken van volgorde mislukt: " + e.message);
     } finally {
       setLoading(false);
     }
@@ -102,7 +102,7 @@ const RouteStopsAdmin = () => {
     <div className="min-h-screen bg-[#f4f1e9] text-[#2c3e54]">
       <nav className="bg-white shadow-sm border-b border-[#2c3e54]/10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
-          <h1 className="text-xl font-bold text-[#2c3e54]">Route Stops Management</h1>
+          <h1 className="text-xl font-bold text-[#2c3e54]">Route-stops Beheer</h1>
           <div className="flex items-center space-x-4">
             <Link to="/admin" className="text-sm text-[#2c3e54] hover:underline">
               Admin Home
@@ -138,17 +138,17 @@ const RouteStopsAdmin = () => {
               className="inline-flex items-center px-4 py-2 rounded-md border border-cyan-900 text-cyan-950 text-sm font-medium hover:bg-cyan-900 hover:text-white transition-colors disabled:opacity-50"
               disabled={loading}
             >
-              Load stops
+              Stops laden
             </button>
             {routeId && (
-              <p className="text-sm text-[#2c3e54]/70 mb-2">Currently viewing route {routeId}</p>
+              <p className="text-sm text-[#2c3e54]/70 mb-2">Je bekijkt momenteel route {routeId}</p>
             )}
           </form>
         </section>
 
         {routeId && (
           <section className="bg-white rounded-lg shadow p-4 border border-[#2c3e54]/10">
-            <h2 className="text-lg font-semibold mb-4 text-[#2c3e54]">Add stop to route</h2>
+            <h2 className="text-lg font-semibold mb-4 text-[#2c3e54]">Stop toevoegen aan route</h2>
             {error && (
               <p className="mb-2 text-sm text-red-600">{error}</p>
             )}
@@ -158,7 +158,7 @@ const RouteStopsAdmin = () => {
             >
               <div>
                 <label className="block font-medium text-[#2c3e54]">
-                  Painting ID
+                  Schilderij ID
                 </label>
                 <input
                   type="number"
@@ -171,7 +171,7 @@ const RouteStopsAdmin = () => {
               </div>
               <div>
                 <label className="block font-medium text-[#2c3e54]">
-                  Sequence number
+                  Volgnummer
                 </label>
                 <input
                   type="number"
@@ -188,7 +188,7 @@ const RouteStopsAdmin = () => {
                   disabled={loading}
                   className="block w-full text-center px-4 py-2 rounded-md border border-cyan-900 text-cyan-950 font-medium hover:bg-cyan-900 hover:text-white transition-colors disabled:opacity-50"
                 >
-                  Add stop
+                  Stop toevoegen
                 </button>
               </div>
             </form>
@@ -198,14 +198,14 @@ const RouteStopsAdmin = () => {
         {routeId && (
           <section className="bg-white rounded-lg shadow p-4 border border-[#2c3e54]/10">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-[#2c3e54]">Stops for route {routeId}</h2>
+              <h2 className="text-lg font-semibold text-[#2c3e54]">Stops voor route {routeId}</h2>
               {loading && (
-                <p className="text-sm text-[#2c3e54]/70">Loading...</p>
+                <p className="text-sm text-[#2c3e54]/70">Laden...</p>
               )}
             </div>
             {!loading && stops.length === 0 && (
               <p className="text-sm text-[#2c3e54]/70 italic">
-                No stops defined for this route yet.
+                Nog geen stops gedefinieerd voor deze route.
               </p>
             )}
             {stops.length > 0 && (
@@ -214,9 +214,9 @@ const RouteStopsAdmin = () => {
                   <thead>
                     <tr className="text-[#2c3e54]/50">
                       <th className="px-4 py-2 text-left font-medium">ID</th>
-                      <th className="px-4 py-2 text-left font-medium">Sequence</th>
-                      <th className="px-4 py-2 text-left font-medium">Painting ID</th>
-                      <th className="px-4 py-2 text-right font-medium">Actions</th>
+                      <th className="px-4 py-2 text-left font-medium">Volgorde</th>
+                      <th className="px-4 py-2 text-left font-medium">Schilderij ID</th>
+                      <th className="px-4 py-2 text-right font-medium">Acties</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#2c3e54]/10">
@@ -236,19 +236,19 @@ const RouteStopsAdmin = () => {
                             onClick={() => changeSequence(s, "up")}
                             className="text-blue-600 hover:underline text-xs font-medium"
                           >
-                            Move up
+                            Omhoog
                           </button>
                           <button
                             onClick={() => changeSequence(s, "down")}
                             className="text-blue-600 hover:underline text-xs font-medium"
                           >
-                            Move down
+                            Omlaag
                           </button>
                           <button
                             onClick={() => handleDeleteStop(s.routeStopId)}
                             className="text-red-600 hover:underline text-xs font-medium"
                           >
-                            Delete
+                            Verwijderen
                           </button>
                         </td>
                       </tr>

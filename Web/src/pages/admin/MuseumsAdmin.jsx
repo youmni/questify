@@ -23,7 +23,7 @@ const MuseumsAdmin = () => {
       const res = await museumAdminService.getAll();
       setMuseums(res.data || []);
     } catch (e) {
-      setError("Failed to load museums");
+      setError("Laden van musea mislukt");
     } finally {
       setLoading(false);
     }
@@ -55,7 +55,7 @@ const MuseumsAdmin = () => {
       setEditingId(null);
       await loadMuseums();
     } catch (e) {
-      setError("Failed to save museum");
+      setError("Opslaan van museum mislukt: " + e.message);
     } finally {
       setLoading(false);
     }
@@ -72,14 +72,14 @@ const MuseumsAdmin = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this museum?")) return;
+    if (!window.confirm("Weet je zeker dat je dit museum wilt verwijderen?")) return;
     setLoading(true);
     setError("");
     try {
       await museumAdminService.remove(id);
       await loadMuseums();
     } catch (e) {
-      setError("Failed to delete museum");
+      setError("Verwijderen van museum mislukt: " + e.message);
     } finally {
       setLoading(false);
     }
@@ -96,7 +96,7 @@ const MuseumsAdmin = () => {
       }
       await loadMuseums();
     } catch (e) {
-      setError("Failed to update status");
+      setError("Bijwerken van status mislukt: " + e.message);
     } finally {
       setLoading(false);
     }
@@ -111,7 +111,7 @@ const MuseumsAdmin = () => {
     <div className="min-h-screen bg-[#f4f1e9] text-[#2c3e54]">
       <nav className="bg-white shadow-sm border-b border-[#2c3e54]/10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
-          <h1 className="text-xl font-bold text-[#2c3e54]">Museums Management</h1>
+          <h1 className="text-xl font-bold text-[#2c3e54]">Museabeheer</h1>
           <div className="flex items-center space-x-4">
             <Link to="/admin" className="text-sm text-[#2c3e54] hover:underline">
               Admin Home
@@ -128,7 +128,7 @@ const MuseumsAdmin = () => {
           
           <section className="lg:col-span-1 bg-white rounded-lg shadow p-4 border border-[#2c3e54]/10 h-fit">
             <h2 className="text-lg font-semibold mb-4 text-[#2c3e54]">
-              {editingId ? "Edit Museum" : "Create Museum"}
+              {editingId ? "Museum Bewerken" : "Museum Aanmaken"}
             </h2>
             {error && (
               <p className="mb-2 text-sm text-red-600">{error}</p>
@@ -136,7 +136,7 @@ const MuseumsAdmin = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-[#2c3e54]">
-                  Name
+                  Naam
                 </label>
                 <input
                   type="text"
@@ -149,7 +149,7 @@ const MuseumsAdmin = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#2c3e54]">
-                  Address
+                  Adres
                 </label>
                 <input
                   type="text"
@@ -162,7 +162,7 @@ const MuseumsAdmin = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#2c3e54]">
-                  Description
+                  Beschrijving
                 </label>
                 <textarea
                   name="description"
@@ -185,7 +185,7 @@ const MuseumsAdmin = () => {
                   htmlFor="isActive"
                   className="ml-2 block text-sm text-[#2c3e54]"
                 >
-                  Active
+                  Actief
                 </label>
               </div>
               <div className="flex flex-col space-y-2 pt-2">
@@ -194,7 +194,7 @@ const MuseumsAdmin = () => {
                   disabled={loading}
                   className="block w-full text-center px-3 py-2 rounded-md border border-cyan-900 text-cyan-950 text-sm font-medium hover:bg-cyan-900 hover:text-white transition-colors disabled:opacity-50"
                 >
-                  {editingId ? "Save changes" : "Create"}
+                  {editingId ? "Wijzigingen opslaan" : "Aanmaken"}
                 </button>
                 {editingId && (
                   <button
@@ -202,7 +202,7 @@ const MuseumsAdmin = () => {
                     onClick={handleCancelEdit}
                     className="block w-full text-center px-3 py-2 rounded-md border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
                   >
-                    Cancel
+                    Annuleren
                   </button>
                 )}
               </div>
@@ -211,22 +211,22 @@ const MuseumsAdmin = () => {
 
           <section className="lg:col-span-2 bg-white rounded-lg shadow p-4 border border-[#2c3e54]/10">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-[#2c3e54]">All Museums</h2>
+              <h2 className="text-lg font-semibold text-[#2c3e54]">Alle Musea</h2>
               <button
                 type="button"
                 onClick={loadMuseums}
                 disabled={loading}
                 className="px-3 py-1 text-xs rounded bg-[#f4f1e9] text-[#2c3e54] hover:bg-[#ebe8de] transition-colors disabled:opacity-50"
               >
-                Refresh
+                Vernieuwen
               </button>
             </div>
             
             {loading && (
-              <p className="text-sm text-[#2c3e54]/70">Loading...</p>
+              <p className="text-sm text-[#2c3e54]/70">Laden...</p>
             )}
             {!loading && museums.length === 0 && (
-              <p className="text-sm text-[#2c3e54]/70">No museums found.</p>
+              <p className="text-sm text-[#2c3e54]/70">Geen musea gevonden.</p>
             )}
 
             <div className="overflow-x-auto">
@@ -234,10 +234,10 @@ const MuseumsAdmin = () => {
                 <thead>
                   <tr className="text-[#2c3e54]/50">
                     <th className="px-4 py-2 text-left font-medium">ID</th>
-                    <th className="px-4 py-2 text-left font-medium">Name</th>
-                    <th className="px-4 py-2 text-left font-medium">Address</th>
+                    <th className="px-4 py-2 text-left font-medium">Naam</th>
+                    <th className="px-4 py-2 text-left font-medium">Adres</th>
                     <th className="px-4 py-2 text-left font-medium">Status</th>
-                    <th className="px-4 py-2 text-right font-medium">Actions</th>
+                    <th className="px-4 py-2 text-right font-medium">Acties</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#2c3e54]/10">
@@ -260,7 +260,7 @@ const MuseumsAdmin = () => {
                               : "inline-flex rounded-full bg-gray-100 px-2 text-[10px] font-bold uppercase text-gray-800"
                           }
                         >
-                          {museum.isActive ? "Active" : "Inactive"}
+                          {museum.isActive ? "Actief" : "Inactief"}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-right space-x-3">
@@ -268,19 +268,19 @@ const MuseumsAdmin = () => {
                           onClick={() => handleEdit(museum)}
                           className="text-blue-600 hover:underline text-xs font-medium"
                         >
-                          Edit
+                          Bewerken
                         </button>
                         <button
                           onClick={() => toggleActive(museum)}
                           className="text-cyan-900 hover:underline text-xs font-medium"
                         >
-                          {museum.isActive ? "Deactivate" : "Activate"}
+                          {museum.isActive ? "Deactiveren" : "Activeren"}
                         </button>
                         <button
                           onClick={() => handleDelete(museum.museumId)}
                           className="text-red-600 hover:underline text-xs font-medium"
                         >
-                          Delete
+                          Verwijderen
                         </button>
                       </td>
                     </tr>
