@@ -66,4 +66,9 @@ public class Painting {
     @OneToMany(mappedBy = "painting", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<RouteStop> routeStops = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "painting", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<UserPaintingScan> userPaintingScans = new ArrayList<>();
 }
