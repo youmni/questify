@@ -9,7 +9,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import ForgotPasswordConfirm from "./pages/auth/ForgotPasswordConfirm";
 import Logout from "./pages/auth/Logout";
 import Dashboard from "./pages/Dashboard";
-import AdminPanel from "./pages/AdminPanel";
+import AdminPanel from "./pages/admin/AdminPanel";
 import MuseumsAdmin from "./pages/admin/MuseumsAdmin";
 import RoutesAdmin from "./pages/admin/RoutesAdmin";
 import PaintingsAdmin from "./pages/admin/PaintingsAdmin";
@@ -34,9 +34,17 @@ const App = () => {
 
           {/* Protected quest routes */}
           <Route element={<PrivateRoute />}>
-            <Route path="/" element={<StartPage />} />
+            <Route path="/" element={<MuseumsList />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/quest" element={<StartPage />} />
+            <Route
+              path="/quest/museums/:museumId/routes/:routeId/start"
+              element={<StartPage />}
+            />
+            <Route
+              path="/quest/museums/:museumId/routes/:routeId/stops/:stopNumber"
+              element={<StopScan />}
+            />
             <Route path="/quest/museums" element={<MuseumsList />} />
             <Route
               path="/quest/museums/:museumId/routes/:routeId"

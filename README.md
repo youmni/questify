@@ -7,7 +7,7 @@
 1. **Docker**: Used for building the backend of the application.
 2. **MySQL**: Used for managing the database.
 3. **Spring Boot**: Used for building the backend of the application.
-4. **React JS**: Used for managing the database.
+4. **React JS**: Used for building the frontend of the application.
 5. **Minio**: Used for image storage.
 
 ## Sources

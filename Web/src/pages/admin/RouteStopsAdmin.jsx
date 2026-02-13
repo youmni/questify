@@ -24,7 +24,7 @@ const RouteStopsAdmin = () => {
       setStops(res.data || []);
       setRouteId(id);
     } catch (e) {
-      setError("Failed to load route stops");
+      setError("Laden van route-stops mislukt: " + e.message);
     } finally {
       setLoading(false);
     }
@@ -61,21 +61,21 @@ const RouteStopsAdmin = () => {
       setForm((prev) => ({ ...prev, paintingId: "", sequenceNumber: "" }));
       await loadStops(routeId);
     } catch (e) {
-      setError("Failed to add stop");
+      setError("Toevoegen van stop mislukt: " + e.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteStop = async (stopId) => {
-    if (!window.confirm("Delete this stop from route?")) return;
+    if (!window.confirm("Deze stop uit de route verwijderen?")) return;
     setLoading(true);
     setError("");
     try {
       await routeStopAdminService.remove(stopId);
       await loadStops(routeId);
     } catch (e) {
-      setError("Failed to delete stop");
+      setError("Verwijderen van stop mislukt: " + e.message);
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ const RouteStopsAdmin = () => {
       await routeStopAdminService.updateSequence(stop.routeStopId, next);
       await loadStops(routeId);
     } catch (e) {
-      setError("Failed to update sequence");
+      setError("Bijwerken van volgorde mislukt: " + e.message);
     } finally {
       setLoading(false);
     }
@@ -101,26 +101,26 @@ const RouteStopsAdmin = () => {
   return (
     <div className="min-h-screen bg-[#f4f1e9] text-[#2c3e54]">
       <nav className="bg-white shadow-sm border-b border-[#2c3e54]/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
-          <h1 className="text-xl font-bold text-[#2c3e54]">Route Stops Management</h1>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+          <h1 className="text-xl font-bold text-[#2c3e54]">Route-stops Beheer</h1>
           <div className="flex items-center space-x-4">
-            <Link to="/admin" className="text-blue-600 hover:text-blue-800">
+            <Link to="/admin" className="text-sm text-[#2c3e54] hover:underline">
               Admin Home
             </Link>
-            <Link to="/" className="text-blue-600 hover:text-blue-800">
-              Dashboard
+            <Link to="/" className="text-sm text-[#2c3e54] hover:underline">
+              Home
             </Link>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 space-y-6">
-        <section className="bg-white rounded-3xl shadow-[0_10px_40px_rgba(44,62,84,0.05)] border border-[#2c3e54]/10 p-6">
+      <main className="max-w-5xl mx-auto py-6 px-4 sm:px-6 lg:px-8 space-y-6">
+        <section className="bg-white rounded-lg shadow p-4 border border-[#2c3e54]/10">
           <form
             onSubmit={handleLoadRoute}
             className="flex flex-wrap items-end gap-4"
           >
-            <div>
+            <div className="flex-1 min-w-[160px]">
               <label className="block text-sm font-medium text-[#2c3e54]">
                 Route ID
               </label>
@@ -129,26 +129,26 @@ const RouteStopsAdmin = () => {
                 name="routeIdInput"
                 value={form.routeIdInput}
                 onChange={handleFormChange}
-                className="mt-1 block w-40 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-900"
                 required
               />
             </div>
             <button
               type="submit"
-              className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
+              className="inline-flex items-center px-4 py-2 rounded-md border border-cyan-900 text-cyan-950 text-sm font-medium hover:bg-cyan-900 hover:text-white transition-colors disabled:opacity-50"
               disabled={loading}
             >
-              Load stops
+              Stops laden
             </button>
             {routeId && (
-              <p className="text-sm text-gray-600">Currently viewing route {routeId}</p>
+              <p className="text-sm text-[#2c3e54]/70 mb-2">Je bekijkt momenteel route {routeId}</p>
             )}
           </form>
         </section>
 
         {routeId && (
-          <section className="bg-white rounded-3xl shadow-[0_10px_40px_rgba(44,62,84,0.05)] border border-[#2c3e54]/10 p-6">
-            <h2 className="text-lg font-semibold mb-4">Add stop to route</h2>
+          <section className="bg-white rounded-lg shadow p-4 border border-[#2c3e54]/10">
+            <h2 className="text-lg font-semibold mb-4 text-[#2c3e54]">Stop toevoegen aan route</h2>
             {error && (
               <p className="mb-2 text-sm text-red-600">{error}</p>
             )}
@@ -158,27 +158,27 @@ const RouteStopsAdmin = () => {
             >
               <div>
                 <label className="block font-medium text-[#2c3e54]">
-                  Painting ID
+                  Schilderij ID
                 </label>
                 <input
                   type="number"
                   name="paintingId"
                   value={form.paintingId}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 focus:outline-none focus:ring-1 focus:ring-cyan-900"
                   required
                 />
               </div>
               <div>
                 <label className="block font-medium text-[#2c3e54]">
-                  Sequence number
+                  Volgnummer
                 </label>
                 <input
                   type="number"
                   name="sequenceNumber"
                   value={form.sequenceNumber}
                   onChange={handleFormChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 focus:outline-none focus:ring-1 focus:ring-cyan-900"
                   required
                 />
               </div>
@@ -186,9 +186,9 @@ const RouteStopsAdmin = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
+                  className="block w-full text-center px-4 py-2 rounded-md border border-cyan-900 text-cyan-950 font-medium hover:bg-cyan-900 hover:text-white transition-colors disabled:opacity-50"
                 >
-                  Add stop
+                  Stop toevoegen
                 </button>
               </div>
             </form>
@@ -196,67 +196,59 @@ const RouteStopsAdmin = () => {
         )}
 
         {routeId && (
-          <section className="bg-white rounded-3xl shadow-[0_10px_40px_rgba(44,62,84,0.05)] border border-[#2c3e54]/10 p-6">
+          <section className="bg-white rounded-lg shadow p-4 border border-[#2c3e54]/10">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Stops for route {routeId}</h2>
+              <h2 className="text-lg font-semibold text-[#2c3e54]">Stops voor route {routeId}</h2>
               {loading && (
-                <p className="text-sm text-gray-500">Loading...</p>
+                <p className="text-sm text-[#2c3e54]/70">Laden...</p>
               )}
             </div>
             {!loading && stops.length === 0 && (
-              <p className="text-sm text-gray-500">
-                No stops defined for this route yet.
+              <p className="text-sm text-[#2c3e54]/70 italic">
+                Nog geen stops gedefinieerd voor deze route.
               </p>
             )}
             {stops.length > 0 && (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 text-sm">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-2 text-left font-medium text-gray-700">
-                        ID
-                      </th>
-                      <th className="px-4 py-2 text-left font-medium text-gray-700">
-                        Sequence
-                      </th>
-                      <th className="px-4 py-2 text-left font-medium text-gray-700">
-                        Painting ID
-                      </th>
-                      <th className="px-4 py-2 text-right font-medium text-gray-700">
-                        Actions
-                      </th>
+                <table className="min-w-full divide-y divide-[#2c3e54]/10 text-sm">
+                  <thead>
+                    <tr className="text-[#2c3e54]/50">
+                      <th className="px-4 py-2 text-left font-medium">ID</th>
+                      <th className="px-4 py-2 text-left font-medium">Volgorde</th>
+                      <th className="px-4 py-2 text-left font-medium">Schilderij ID</th>
+                      <th className="px-4 py-2 text-right font-medium">Acties</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
+                  <tbody className="divide-y divide-[#2c3e54]/10">
                     {stops.map((s) => (
                       <tr key={s.routeStopId}>
-                        <td className="px-4 py-2 whitespace-nowrap">
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs">
                           {s.routeStopId}
                         </td>
-                        <td className="px-4 py-2 whitespace-nowrap">
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-[#2c3e54]">
                           {s.sequenceNumber}
                         </td>
-                        <td className="px-4 py-2 whitespace-nowrap">
+                        <td className="px-4 py-3 whitespace-nowrap text-[#2c3e54]/70">
                           {s.paintingId}
                         </td>
-                        <td className="px-4 py-2 whitespace-nowrap text-right space-x-2">
+                        <td className="px-4 py-3 whitespace-nowrap text-right space-x-3">
                           <button
                             onClick={() => changeSequence(s, "up")}
-                            className="text-xs text-blue-600 hover:text-blue-800"
+                            className="text-blue-600 hover:underline text-xs font-medium"
                           >
-                            Move up
+                            Omhoog
                           </button>
                           <button
                             onClick={() => changeSequence(s, "down")}
-                            className="text-xs text-blue-600 hover:text-blue-800"
+                            className="text-blue-600 hover:underline text-xs font-medium"
                           >
-                            Move down
+                            Omlaag
                           </button>
                           <button
                             onClick={() => handleDeleteStop(s.routeStopId)}
-                            className="text-xs text-red-600 hover:text-red-800"
+                            className="text-red-600 hover:underline text-xs font-medium"
                           >
-                            Delete
+                            Verwijderen
                           </button>
                         </td>
                       </tr>
