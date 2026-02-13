@@ -1,5 +1,6 @@
 package com.questify.api.services.implementation;
 
+import com.questify.api.dto.request.CreateHintDTO;
 import com.questify.api.dto.request.CreatePaintingDTO;
 import com.questify.api.dto.request.UpdatePaintingDTO;
 import com.questify.api.dto.response.HintDTO;
@@ -9,6 +10,7 @@ import com.questify.api.model.Hint;
 import com.questify.api.model.Museum;
 import com.questify.api.model.Painting;
 import com.questify.api.model.enums.HintType;
+import com.questify.api.repository.HintRepository;
 import com.questify.api.repository.MuseumRepository;
 import com.questify.api.repository.PaintingRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class PaintingAdminService {
 
     private final PaintingRepository paintingRepository;
     private final MuseumRepository museumRepository;
+    private final HintRepository hintRepository;
 
     @Transactional(readOnly = true)
     public List<PaintingDetailDTO> getAllPaintings() {
@@ -99,6 +102,33 @@ public class PaintingAdminService {
         Painting painting = paintingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Painting not found with id: " + id));
         paintingRepository.delete(painting);
+    }
+
+    @Transactional
+    public HintDTO addHintToPainting(Long paintingId, CreateHintDTO dto) {
+        Painting painting = paintingRepository.findById(paintingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Painting not found with id: " + paintingId));
+
+        HintType type = dto.getHintType();
+        if (type == null) {
+            throw new IllegalArgumentException("hintType is verplicht");
+        }
+
+        Integer displayOrder = dto.getDisplayOrder();
+        if (displayOrder == null) {
+            long count = hintRepository.countByPainting_PaintingIdAndHintType(paintingId, type);
+            displayOrder = (int) count + 1;
+        }
+
+        Hint hint = Hint.builder()
+                .painting(painting)
+                .hintType(type)
+                .text(dto.getText())
+                .displayOrder(displayOrder)
+                .build();
+
+        Hint saved = hintRepository.save(hint);
+        return mapHintToDTO(saved);
     }
 
     private PaintingDetailDTO convertToDTO(Painting painting) {

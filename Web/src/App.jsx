@@ -14,6 +14,7 @@ import MuseumsAdmin from "./pages/admin/MuseumsAdmin";
 import RoutesAdmin from "./pages/admin/RoutesAdmin";
 import PaintingsAdmin from "./pages/admin/PaintingsAdmin";
 import RouteStopsAdmin from "./pages/admin/RouteStopsAdmin";
+import PaintingHintsAdmin from "./pages/admin/PaintingHintsAdmin";
 import StartPage from "./pages/StartPage";
 import MuseumsList from "./pages/MuseumsList";
 import RouteDetail from "./pages/RouteDetail";
@@ -63,6 +64,7 @@ const App = () => {
             <Route path="/admin/routes" element={<RoutesAdmin />} />
             <Route path="/admin/paintings" element={<PaintingsAdmin />} />
             <Route path="/admin/route-stops" element={<RouteStopsAdmin />} />
+            <Route path="/admin/painting-hints" element={<PaintingHintsAdmin />} />
           </Route>
 
           {/* Fallback */}

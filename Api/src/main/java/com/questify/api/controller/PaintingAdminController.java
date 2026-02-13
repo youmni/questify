@@ -84,4 +84,5 @@ public class PaintingAdminController {
         paintingAdminService.deletePainting(id);
         return ResponseEntity.noContent().build();
     }
+
 }

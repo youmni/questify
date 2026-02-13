@@ -7,6 +7,7 @@ const paintingAdminService = {
   create: (data) => api.post("/admin/paintings", data),
   update: (id, data) => api.put(`/admin/paintings/${id}`, data),
   remove: (id) => api.delete(`/admin/paintings/${id}`),
+  addHint: (paintingId, data) => api.post(`/admin/paintings/${paintingId}/hints`, data),
 };
 
 export default paintingAdminService;

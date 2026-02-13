@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import paintingAdminService from "../../services/paintingAdminService";
+import museumAdminService from "../../services/museumAdminService";
 
 const emptyForm = {
   museumId: "",
@@ -20,6 +21,7 @@ const PaintingsAdmin = () => {
   const [error, setError] = useState("");
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
+  const [museums, setMuseums] = useState([]);
 
   const loadPaintings = async () => {
     setLoading(true);
@@ -34,8 +36,18 @@ const PaintingsAdmin = () => {
     }
   };
 
+  const loadMuseums = async () => {
+    try {
+      const res = await museumAdminService.getAll();
+      setMuseums(res.data || []);
+    } catch (e) {
+      console.error("Laden van musea mislukt", e);
+    }
+  };
+
   useEffect(() => {
     loadPaintings();
+    loadMuseums();
   }, []);
 
   const handleChange = (e) => {
@@ -44,6 +56,12 @@ const PaintingsAdmin = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const getMuseumName = (museumId) => {
+    if (!museumId) return "";
+    const museum = museums.find((m) => m.museumId === museumId);
+    return museum ? museum.name : museumId;
   };
 
   const handleSubmit = async (e) => {
@@ -139,15 +157,21 @@ const PaintingsAdmin = () => {
             )}
             <form onSubmit={handleSubmit} className="space-y-3 text-sm">
               <div>
-                <label className="block font-medium text-[#2c3e54]">Museum ID</label>
-                <input
-                  type="number"
+                <label className="block font-medium text-[#2c3e54]">Museum</label>
+                <select
                   name="museumId"
                   value={form.museumId}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-900"
+                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-cyan-900"
                   required
-                />
+                >
+                  <option value="">Selecteer een museum...</option>
+                  {museums.map((m) => (
+                    <option key={m.museumId} value={m.museumId}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block font-medium text-[#2c3e54]">Titel</label>
@@ -248,7 +272,7 @@ const PaintingsAdmin = () => {
                   <button
                     type="button"
                     onClick={handleCancelEdit}
-                    className="block w-full text-center px-3 py-2 rounded-md border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
+                    className="block w-full text-center px-3 py-2 rounded-md border border-[#2c3e54]/20 text-[#2c3e54] text-sm font-medium hover:bg-[#f4f1e9] transition-colors"
                   >
                     Annuleren
                   </button>
@@ -282,7 +306,7 @@ const PaintingsAdmin = () => {
                 <thead>
                   <tr className="text-[#2c3e54]/50">
                     <th className="px-2 py-2 text-left font-medium">ID</th>
-                    <th className="px-2 py-2 text-left font-medium">Mus. ID</th>
+                    <th className="px-2 py-2 text-left font-medium">Museum</th>
                     <th className="px-2 py-2 text-left font-medium">Titel</th>
                     <th className="px-2 py-2 text-left font-medium">Artiest</th>
                     <th className="px-2 py-2 text-left font-medium">Label</th>
@@ -293,7 +317,7 @@ const PaintingsAdmin = () => {
                   {paintings.map((p) => (
                     <tr key={p.paintingId}>
                       <td className="px-2 py-3 whitespace-nowrap font-mono">{p.paintingId}</td>
-                      <td className="px-2 py-3 whitespace-nowrap text-[#2c3e54]/70">{p.museumId}</td>
+                      <td className="px-2 py-3 whitespace-nowrap text-[#2c3e54]/70">{getMuseumName(p.museumId)}</td>
                       <td className="px-2 py-3 whitespace-nowrap font-medium text-[#2c3e54]">{p.title}</td>
                       <td className="px-2 py-3 whitespace-nowrap text-[#2c3e54]/70">{p.artist}</td>
                       <td className="px-2 py-3 whitespace-nowrap text-[#2c3e54]/70">{p.museumLabel}</td>
