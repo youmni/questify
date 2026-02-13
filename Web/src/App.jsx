@@ -34,7 +34,7 @@ const App = () => {
 
           {/* Protected quest routes */}
           <Route element={<PrivateRoute />}>
-            <Route path="/" element={<StartPage />} />
+            <Route path="/" element={<MuseumsList />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/quest" element={<StartPage />} />
             <Route path="/quest/museums" element={<MuseumsList />} />
