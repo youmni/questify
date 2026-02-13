@@ -9,7 +9,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import ForgotPasswordConfirm from "./pages/auth/ForgotPasswordConfirm";
 import Logout from "./pages/auth/Logout";
 import Dashboard from "./pages/Dashboard";
-import AdminPanel from "./pages/AdminPanel";
+import AdminPanel from "./pages/admin/AdminPanel";
 import MuseumsAdmin from "./pages/admin/MuseumsAdmin";
 import RoutesAdmin from "./pages/admin/RoutesAdmin";
 import PaintingsAdmin from "./pages/admin/PaintingsAdmin";

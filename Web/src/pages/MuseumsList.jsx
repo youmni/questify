@@ -35,7 +35,7 @@ const MuseumsList = () => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
           <h1 className="text-xl font-bold text-[#2c3e54]">Kies een museum</h1>
           <Link to="/dashboard" className="text-sm text-[#2c3e54] hover:underline">
-            Terug naar dashboard
+            Dashboard
           </Link>
         </div>
       </nav>
