@@ -42,4 +42,14 @@ public class Route {
     @OrderBy("sequenceNumber ASC")
     @Builder.Default
     private List<RouteStop> stops = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<UserRouteProgress> userRouteProgresses = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<UserPaintingScan> userPaintingScans = new ArrayList<>();
 }
