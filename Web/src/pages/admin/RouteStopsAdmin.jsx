@@ -108,7 +108,7 @@ const RouteStopsAdmin = () => {
               Admin Home
             </Link>
             <Link to="/" className="text-blue-600 hover:text-blue-800">
-              Dashboard
+              Home
             </Link>
           </div>
         </div>
