@@ -37,6 +37,14 @@ const App = () => {
             <Route path="/" element={<MuseumsList />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/quest" element={<StartPage />} />
+            <Route
+              path="/quest/museums/:museumId/routes/:routeId/start"
+              element={<StartPage />}
+            />
+            <Route
+              path="/quest/museums/:museumId/routes/:routeId/stops/:stopNumber"
+              element={<StopScan />}
+            />
             <Route path="/quest/museums" element={<MuseumsList />} />
             <Route
               path="/quest/museums/:museumId/routes/:routeId"

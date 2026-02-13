@@ -6,6 +6,7 @@ const MuseumsList = () => {
   const [museums, setMuseums] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -24,6 +25,10 @@ const MuseumsList = () => {
     load();
   }, []);
 
+  const filteredMuseums = museums.filter((museum) =>
+    museum.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-[#f4f1e9] text-[#2c3e54]">
       <nav className="bg-white shadow-sm border-b border-[#2c3e54]/10">
@@ -36,14 +41,24 @@ const MuseumsList = () => {
       </nav>
 
       <main className="max-w-5xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Zoek een museum..."
+            className="w-full p-2 rounded border border-[#2c3e54]/20"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
         {loading && <p className="text-[#2c3e54]/70">Laden...</p>}
         {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
-        {!loading && museums.length === 0 && (
+        {!loading && filteredMuseums.length === 0 && (
           <p className="text-[#2c3e54]/70">Geen musea gevonden.</p>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {museums.map((museum) => (
+          {filteredMuseums.map((museum) => (
             <div
               key={museum.museumId}
               className="bg-white rounded-lg shadow p-4 flex flex-col justify-between"
@@ -64,7 +79,7 @@ const MuseumsList = () => {
                   museum.routes.map((route) => (
                     <Link
                       key={route.routeId}
-                      to={`/quest/museums/${museum.museumId}/routes/${route.routeId}`}
+                      to={`/quest/museums/${museum.museumId}/routes/${route.routeId}/start`}
                       className="block w-full text-left px-3 py-2 rounded-md border border-cyan-900 text-cyan-950 text-sm font-medium hover:bg-cyan-900 hover:text-white transition-colors"
                     >
                       {route.name}
