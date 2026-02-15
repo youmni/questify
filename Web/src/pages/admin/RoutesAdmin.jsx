@@ -73,14 +73,10 @@ const RoutesAdmin = () => {
         museumId: Number(form.museumId),
         name: form.name,
         description: form.description,
-        isActive: form.active,
+        isActive: form.isActive,
       };
       if (editingId) {
-        await routeAdminService.update(editingId, {
-          name: payload.name,
-          description: payload.description,
-          isActive: payload.active,
-        });
+        await routeAdminService.update(editingId, payload);
       } else {
         await routeAdminService.create(payload);
       }
@@ -96,11 +92,12 @@ const RoutesAdmin = () => {
 
   const handleEdit = (route) => {
     setEditingId(route.routeId);
+    const isCurrentlyActive = route.active ?? route.isActive ?? true;
     setForm({
       museumId: route.museumId?.toString() || "",
       name: route.name || "",
       description: route.description || "",
-      isActive: route.active ?? true,
+      isActive: isCurrentlyActive,
     });
   };
 
@@ -121,8 +118,9 @@ const RoutesAdmin = () => {
   const toggleActive = async (route) => {
     setLoading(true);
     setError("");
+    const isCurrentlyActive = route.active ?? route.isActive;
     try {
-      if (route.active) {
+      if (isCurrentlyActive) {
         await routeAdminService.deactivate(route.routeId);
       } else {
         await routeAdminService.activate(route.routeId);
@@ -158,7 +156,7 @@ const RoutesAdmin = () => {
 
       <main className="max-w-5xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
+
           <section className="lg:col-span-1 bg-white rounded-lg shadow p-4 border border-[#2c3e54]/10 h-fit">
             <h2 className="text-lg font-semibold mb-4 text-[#2c3e54]">
               {editingId ? "Route Bewerken" : "Route Aanmaken"}
@@ -285,50 +283,53 @@ const RoutesAdmin = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#2c3e54]/10">
-                  {routes.map((route) => (
-                    <tr key={route.routeId}>
-                      <td className="px-4 py-3 whitespace-nowrap font-mono text-xs">
-                        {route.routeId}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-[#2c3e54]/70">
-                        {getMuseumName(route.museumId)}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap font-medium text-[#2c3e54]">
-                        {route.name}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span
-                          className={
-                            route.active
-                              ? "inline-flex rounded-full bg-emerald-50 px-2 text-[10px] font-bold uppercase text-emerald-700"
-                              : "inline-flex rounded-full bg-[#f4f1e9] px-2 text-[10px] font-bold uppercase text-[#8a8579]"
-                          }
-                        >
-                          {route.active ? "Actief" : "Inactief"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-right space-x-3">
-                        <button
-                          onClick={() => handleEdit(route)}
-                          className="text-blue-600 hover:underline text-xs font-medium"
-                        >
-                          Bewerken
-                        </button>
-                        <button
-                          onClick={() => toggleActive(route)}
-                          className="text-cyan-900 hover:underline text-xs font-medium"
-                        >
-                          {route.active ? "Deactiveren" : "Activeren"}
-                        </button>
-                        <button
-                          onClick={() => handleDelete(route.routeId)}
-                          className="text-red-600 hover:underline text-xs font-medium"
-                        >
-                          Verwijderen
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {routes.map((route) => {
+                    const isActive = route.active ?? route.isActive;
+                    return (
+                      <tr key={route.routeId}>
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs">
+                          {route.routeId}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-[#2c3e54]/70">
+                          {getMuseumName(route.museumId)}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap font-medium text-[#2c3e54]">
+                          {route.name}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span
+                            className={
+                              isActive
+                                ? "inline-flex rounded-full bg-emerald-50 px-2 text-[10px] font-bold uppercase text-emerald-700"
+                                : "inline-flex rounded-full bg-[#f4f1e9] px-2 text-[10px] font-bold uppercase text-[#8a8579]"
+                            }
+                          >
+                            {isActive ? "Actief" : "Inactief"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-right space-x-3">
+                          <button
+                            onClick={() => handleEdit(route)}
+                            className="text-blue-600 hover:underline text-xs font-medium"
+                          >
+                            Bewerken
+                          </button>
+                          <button
+                            onClick={() => toggleActive(route)}
+                            className="text-cyan-900 hover:underline text-xs font-medium"
+                          >
+                            {isActive ? "Deactiveren" : "Activeren"}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(route.routeId)}
+                            className="text-red-600 hover:underline text-xs font-medium"
+                          >
+                            Verwijderen
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
