@@ -70,21 +70,23 @@ const MuseumsList = () => {
                   <p className="text-sm text-[#2c3e54]/80 mb-2">{museum.description}</p>
                 )}
                 <p className="text-xs uppercase tracking-wide text-[#2c3e54]/50">
-                  Routes: {museum.routes?.length ?? 0}
+                  Routes: {museum.routes?.filter(r => r.active).length ?? 0}
                 </p>
               </div>
 
               <div className="mt-4 space-y-2">
                 {museum.routes && museum.routes.length > 0 ? (
-                  museum.routes.map((route) => (
-                    <Link
-                      key={route.routeId}
-                      to={`/quest/museums/${museum.museumId}/routes/${route.routeId}/start`}
-                      className="block w-full text-left px-3 py-2 rounded-md border border-cyan-900 text-cyan-950 text-sm font-medium hover:bg-cyan-900 hover:text-white transition-colors"
-                    >
-                      {route.name}
-                    </Link>
-                  ))
+                  museum.routes
+                    .filter((route) => route.active)
+                    .map((route) => (
+                      <Link
+                        key={route.routeId}
+                        to={`/quest/museums/${museum.museumId}/routes/${route.routeId}/start`}
+                        className="block w-full text-left px-3 py-2 rounded-md border border-cyan-900 text-cyan-950 text-sm font-medium hover:bg-cyan-900 hover:text-white transition-colors"
+                      >
+                        {route.name}
+                      </Link>
+                    ))
                 ) : (
                   <p className="text-sm text-gray-500">
                     Geen routes beschikbaar voor dit museum.

@@ -67,7 +67,7 @@ const MuseumsAdmin = () => {
       name: museum.name || "",
       address: museum.address || "",
       description: museum.description || "",
-      isActive: museum.isActive ?? true,
+      isActive: museum.active ?? true,
     });
   };
 
@@ -89,7 +89,7 @@ const MuseumsAdmin = () => {
     setLoading(true);
     setError("");
     try {
-      if (museum.isActive) {
+      if (museum.active) {
         await museumAdminService.deactivate(museum.museumId);
       } else {
         await museumAdminService.activate(museum.museumId);
@@ -255,12 +255,12 @@ const MuseumsAdmin = () => {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span
                           className={
-                            museum.isActive
+                            museum.active
                               ? "inline-flex rounded-full bg-green-100 px-2 text-[10px] font-bold uppercase text-green-800"
                               : "inline-flex rounded-full bg-gray-100 px-2 text-[10px] font-bold uppercase text-gray-800"
                           }
                         >
-                          {museum.isActive ? "Actief" : "Inactief"}
+                          {museum.active ? "Actief" : "Inactief"}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-right space-x-3">
@@ -274,7 +274,7 @@ const MuseumsAdmin = () => {
                           onClick={() => toggleActive(museum)}
                           className="text-cyan-900 hover:underline text-xs font-medium"
                         >
-                          {museum.isActive ? "Deactiveren" : "Activeren"}
+                          {museum.active ? "Deactiveren" : "Activeren"}
                         </button>
                         <button
                           onClick={() => handleDelete(museum.museumId)}

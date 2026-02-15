@@ -73,13 +73,13 @@ const RoutesAdmin = () => {
         museumId: Number(form.museumId),
         name: form.name,
         description: form.description,
-        isActive: form.isActive,
+        isActive: form.active,
       };
       if (editingId) {
         await routeAdminService.update(editingId, {
           name: payload.name,
           description: payload.description,
-          isActive: payload.isActive,
+          isActive: payload.active,
         });
       } else {
         await routeAdminService.create(payload);
@@ -100,7 +100,7 @@ const RoutesAdmin = () => {
       museumId: route.museumId?.toString() || "",
       name: route.name || "",
       description: route.description || "",
-      isActive: route.isActive ?? true,
+      isActive: route.active ?? true,
     });
   };
 
@@ -122,7 +122,7 @@ const RoutesAdmin = () => {
     setLoading(true);
     setError("");
     try {
-      if (route.isActive) {
+      if (route.active) {
         await routeAdminService.deactivate(route.routeId);
       } else {
         await routeAdminService.activate(route.routeId);
@@ -299,12 +299,12 @@ const RoutesAdmin = () => {
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span
                           className={
-                            route.isActive
+                            route.active
                               ? "inline-flex rounded-full bg-emerald-50 px-2 text-[10px] font-bold uppercase text-emerald-700"
                               : "inline-flex rounded-full bg-[#f4f1e9] px-2 text-[10px] font-bold uppercase text-[#8a8579]"
                           }
                         >
-                          {route.isActive ? "Actief" : "Inactief"}
+                          {route.active ? "Actief" : "Inactief"}
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-right space-x-3">
@@ -318,7 +318,7 @@ const RoutesAdmin = () => {
                           onClick={() => toggleActive(route)}
                           className="text-cyan-900 hover:underline text-xs font-medium"
                         >
-                          {route.isActive ? "Deactiveren" : "Activeren"}
+                          {route.active ? "Deactiveren" : "Activeren"}
                         </button>
                         <button
                           onClick={() => handleDelete(route.routeId)}
