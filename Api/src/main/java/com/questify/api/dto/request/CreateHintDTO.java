@@ -3,22 +3,24 @@ package com.questify.api.dto.request;
 import com.questify.api.model.enums.HintType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateHintDTO {
 
-    @NotNull
-    private HintType hintType; // STANDARD / EXTRA
-
     @NotBlank
-    @Size(max = 1000)
     private String text;
 
-    // optioneel: als null → achteraan plaatsen
+    @NotNull
+    private HintType hintType;
+
+    /**
+     * Optional. If null, the backend will append this hint
+     * after existing hints of the same type for the painting.
+     */
     private Integer displayOrder;
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import routeAdminService from "../../services/routeAdminService";
+import museumAdminService from "../../services/museumAdminService";
 
 const emptyForm = {
   museumId: "",
@@ -15,6 +16,8 @@ const RoutesAdmin = () => {
   const [error, setError] = useState("");
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
+  const [museums, setMuseums] = useState([]);
+  const [museumsLoading, setMuseumsLoading] = useState(false);
 
   const loadRoutes = async () => {
     setLoading(true);
@@ -29,9 +32,29 @@ const RoutesAdmin = () => {
     }
   };
 
+  const loadMuseums = async () => {
+    setMuseumsLoading(true);
+    try {
+      const res = await museumAdminService.getAll();
+      setMuseums(res.data || []);
+    } catch (e) {
+      // Alleen loggen; routes blijven werken ook zonder museumlijst
+      console.error("Laden van musea mislukt", e);
+    } finally {
+      setMuseumsLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadRoutes();
+    loadMuseums();
   }, []);
+
+  const getMuseumName = (museumId) => {
+    if (!museumId) return "";
+    const museum = museums.find((m) => m.museumId === museumId);
+    return museum ? museum.name : museumId;
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -146,16 +169,27 @@ const RoutesAdmin = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-[#2c3e54]">
-                  Museum ID
+                  Museum
                 </label>
-                <input
-                  type="number"
+                <select
                   name="museumId"
                   value={form.museumId}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-900"
+                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-cyan-900"
                   required
-                />
+                >
+                  <option value="">Selecteer een museum...</option>
+                  {museums.map((m) => (
+                    <option key={m.museumId} value={m.museumId}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-[11px] text-[#2c3e54]/60">
+                  {museumsLoading
+                    ? "Musea worden geladen..."
+                    : "Kies het museum waarvoor deze route is."}
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#2c3e54]">
@@ -210,7 +244,7 @@ const RoutesAdmin = () => {
                   <button
                     type="button"
                     onClick={handleCancelEdit}
-                    className="block w-full text-center px-3 py-2 rounded-md border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
+                    className="block w-full text-center px-3 py-2 rounded-md border border-[#2c3e54]/20 text-[#2c3e54] text-sm font-medium hover:bg-[#f4f1e9] transition-colors"
                   >
                     Annuleren
                   </button>
@@ -244,7 +278,7 @@ const RoutesAdmin = () => {
                 <thead>
                   <tr className="text-[#2c3e54]/50">
                     <th className="px-4 py-2 text-left font-medium">ID</th>
-                    <th className="px-4 py-2 text-left font-medium">Museum ID</th>
+                    <th className="px-4 py-2 text-left font-medium">Museum</th>
                     <th className="px-4 py-2 text-left font-medium">Naam</th>
                     <th className="px-4 py-2 text-left font-medium">Status</th>
                     <th className="px-4 py-2 text-right font-medium">Acties</th>
@@ -257,7 +291,7 @@ const RoutesAdmin = () => {
                         {route.routeId}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-[#2c3e54]/70">
-                        {route.museumId}
+                        {getMuseumName(route.museumId)}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap font-medium text-[#2c3e54]">
                         {route.name}
@@ -266,8 +300,8 @@ const RoutesAdmin = () => {
                         <span
                           className={
                             route.isActive
-                              ? "inline-flex rounded-full bg-green-100 px-2 text-[10px] font-bold uppercase text-green-800"
-                              : "inline-flex rounded-full bg-gray-100 px-2 text-[10px] font-bold uppercase text-gray-800"
+                              ? "inline-flex rounded-full bg-emerald-50 px-2 text-[10px] font-bold uppercase text-emerald-700"
+                              : "inline-flex rounded-full bg-[#f4f1e9] px-2 text-[10px] font-bold uppercase text-[#8a8579]"
                           }
                         >
                           {route.isActive ? "Actief" : "Inactief"}

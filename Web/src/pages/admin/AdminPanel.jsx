@@ -31,7 +31,7 @@ const AdminPanel = () => {
               Welkom bij het admin paneel, {user?.firstName}!
             </p>
             <p className="text-sm text-[#2c3e54]/70 mt-2">
-              Gebruik de onderstaande secties om musea, routes, schilderijen en route-stops te beheren.
+              Gebruik de onderstaande secties om musea, routes, schilderijen, route-stops en hints te beheren.
             </p>
           </div>
 
@@ -94,6 +94,21 @@ const AdminPanel = () => {
                 className="block w-full text-center px-3 py-2 rounded-md border border-cyan-900 text-cyan-950 text-sm font-medium hover:bg-cyan-900 hover:text-white transition-colors"
               >
                 Stops Beheren
+              </Link>
+            </div>
+
+            <div className="bg-white rounded-lg shadow p-4 flex flex-col justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-[#2c3e54]">Hints</h3>
+                <p className="text-sm text-[#2c3e54]/70 mb-4">
+                  Beheer standaard- en extra hints per schilderij.
+                </p>
+              </div>
+              <Link
+                to="/admin/painting-hints"
+                className="block w-full text-center px-3 py-2 rounded-md border border-cyan-900 text-cyan-950 text-sm font-medium hover:bg-cyan-900 hover:text-white transition-colors"
+              >
+                Hints Beheren
               </Link>
             </div>
 

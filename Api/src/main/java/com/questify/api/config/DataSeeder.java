@@ -279,9 +279,9 @@ public class DataSeeder implements CommandLineRunner {
         progressRepository.save(progress);
 
         // Voeg scans toe (eerste N stops)
-        int n = Math.min(scannedCount, route.getStops().size());
-        for (int i = 0; i < n; i++) {
-            Painting p = route.getStops().get(i).getPainting();
+                int n = Math.min(scannedCount, route.getStops().size());
+                for (int i = 0; i < n; i++) {
+                        Painting p = route.getStops().get(i).getPainting();
 
             // confidence_score verplicht + uniek per (user, painting, route)
             UserPaintingScan scan = UserPaintingScan.builder()
