@@ -111,6 +111,7 @@ public class AuthController {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .userType(user.getUserType().name())
+                .enabled(user.isEnabled())
                 .build();
 
         return ResponseEntity.ok(dto);
