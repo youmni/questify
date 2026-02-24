@@ -12,7 +12,7 @@ const Dashboard = () => {
             <div className="flex items-center space-x-4">
               <h1 className="text-xl font-bold tracking-wider">QUESTIFY</h1>
               <Link
-                to="/quest"
+                to="/"
                 className="text-sm text-[#2c3e54] hover:underline"
               >
                 Start speurtocht
