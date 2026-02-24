@@ -111,7 +111,13 @@ public class RouteStopAdminService {
             throw new IllegalArgumentException("Number of provided stop IDs does not match route stops count");
         }
 
-        // Update sequence numbers
+        // Fix for route stops page give high sequence numbers (temporary) to avoid unique constraint issues during reordering
+        for (int i = 0; i < stops.size(); i++) {
+            stops.get(i).setSequenceNumber(10000 + i); 
+        }
+
+        routeStopRepository.saveAllAndFlush(stops); 
+
         for (int i = 0; i < orderedRouteStopIds.size(); i++) {
             Long stopId = orderedRouteStopIds.get(i);
             RouteStop stop = stops.stream()
