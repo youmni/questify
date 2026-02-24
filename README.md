@@ -29,6 +29,8 @@ https://chatgpt.com/share/6984edbb-fd38-8007-b669-52ffcd85828f - Data Seeder
 
 https://chatgpt.com/share/69850dac-bc98-8007-a925-feb38e87e68a - Mapper fixes
 
+https://gemini.google.com/share/a51b1dc0ab5e - Frontend
+
 ## Authors
 - [@Youmni Malha](https://github.com/Youmni)
 - [@Brent Vanroelen](https://github.com/brentvanroelen)
