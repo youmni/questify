@@ -82,8 +82,26 @@ public class PaintingVerificationService {
             Painting painting = paintingRepository.findById(paintingId)
                     .orElseThrow(() -> new RuntimeException("Painting not found"));
 
+            if (painting.getImageRecognitionKey() == null || painting.getImageRecognitionKey().isBlank()) {
+                return ImageVerificationResponseDTO.builder()
+                        .isMatch(false)
+                        .confidenceScore(0.0)
+                        .message("Dit schilderij heeft nog geen beeldherkenningssleutel. Neem contact op met de beheerder.")
+                        .build();
+            }
+
             String referenceImagePath = "paintings/" + painting.getImageRecognitionKey() + ".jpg";
-            String localReferencePath = minioStorageService.downloadImageToTemp(referenceImagePath);
+            String localReferencePath;
+            try {
+                localReferencePath = minioStorageService.downloadImageToTemp(referenceImagePath);
+            } catch (IllegalStateException e) {
+                return ImageVerificationResponseDTO.builder()
+                        .isMatch(false)
+                        .confidenceScore(0.0)
+                        .message("Er is nog geen referentieafbeelding beschikbaar voor dit schilderij. " +
+                                 "De beheerder moet eerst een afbeelding uploaden via het admin paneel.")
+                        .build();
+            }
 
             try {
                 // 3. Perform image comparison
