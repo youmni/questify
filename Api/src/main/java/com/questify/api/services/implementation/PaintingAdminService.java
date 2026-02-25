@@ -16,6 +16,7 @@ import com.questify.api.repository.PaintingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Comparator;
 import java.util.List;
@@ -28,6 +29,7 @@ public class PaintingAdminService {
     private final PaintingRepository paintingRepository;
     private final MuseumRepository museumRepository;
     private final HintRepository hintRepository;
+    private final MinioStorageService minioStorageService;
 
     @Transactional(readOnly = true)
     public List<PaintingDetailDTO> getAllPaintings() {
@@ -102,6 +104,19 @@ public class PaintingAdminService {
         Painting painting = paintingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Painting not found with id: " + id));
         paintingRepository.delete(painting);
+    }
+
+    @Transactional
+    public String uploadPaintingImage(Long paintingId, MultipartFile file) throws Exception {
+        Painting painting = paintingRepository.findById(paintingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Painting not found with id: " + paintingId));
+
+        String key = painting.getImageRecognitionKey();
+        if (key == null || key.isBlank()) {
+            throw new IllegalStateException("Painting has no imageRecognitionKey set. Set a key before uploading an image.");
+        }
+
+        return minioStorageService.uploadPaintingImage(file, key);
     }
 
     @Transactional
