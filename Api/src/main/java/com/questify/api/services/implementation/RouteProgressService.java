@@ -90,6 +90,30 @@ public class RouteProgressService {
     }
 
     /**
+     * Restart a route: reset progress and delete all scans
+     */
+    @Transactional
+    public RouteProgressDTO restartRoute(Long userId, Long routeId) {
+        Optional<UserRouteProgress> existing = progressRepository.findByUser_IdAndRoute_RouteId(userId, routeId);
+
+        // Delete all existing scans for this user/route
+        scanRepository.deleteByUser_IdAndRoute_RouteId(userId, routeId);
+
+        if (existing.isPresent()) {
+            UserRouteProgress progress = existing.get();
+            progress.setCurrentStopNumber(1);
+            progress.setCompleted(false);
+            progress.setCompletedAt(null);
+            progress = progressRepository.save(progress);
+            log.info("Restarted route {} for user {}", routeId, userId);
+            return buildProgressDTO(progress);
+        }
+
+        // If no progress existed yet, just create new
+        return getOrCreateProgress(userId, routeId);
+    }
+
+    /**
      * Get all user's route progress
      */
     @Transactional(readOnly = true)
