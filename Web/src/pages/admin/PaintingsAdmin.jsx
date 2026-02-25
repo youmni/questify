@@ -1,7 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import paintingAdminService from "../../services/paintingAdminService";
 import museumAdminService from "../../services/museumAdminService";
+
+const ImageIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>;
+const UploadIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>;
+const AlertIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>;
 
 const emptyForm = {
   museumId: "",
@@ -19,9 +23,14 @@ const PaintingsAdmin = () => {
   const [paintings, setPaintings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [museums, setMuseums] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageUploadWarning, setImageUploadWarning] = useState("");
+  const fileInputRef = useRef(null);
 
   const loadPaintings = async () => {
     setLoading(true);
@@ -52,10 +61,30 @@ const PaintingsAdmin = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImageUploadWarning("");
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result);
+    reader.readAsDataURL(file);
+
+    // Auto-fill imageRecognitionKey from filename if not already set
+    if (!form.imageRecognitionKey) {
+      const key = file.name.replace(/\.[^.]+$/, "").replace(/\s+/g, "-").toLowerCase();
+      setForm((prev) => ({ ...prev, imageRecognitionKey: key }));
+    }
+  };
+
+  const clearImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setImageUploadWarning("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const getMuseumName = (museumId) => {
@@ -68,6 +97,8 @@ const PaintingsAdmin = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
+    setImageUploadWarning("");
     try {
       const payload = {
         museumId: Number(form.museumId),
@@ -80,13 +111,33 @@ const PaintingsAdmin = () => {
         infoText: form.infoText,
         externalLink: form.externalLink,
       };
+
+      let savedId = editingId;
       if (editingId) {
         await paintingAdminService.update(editingId, payload);
       } else {
-        await paintingAdminService.create(payload);
+        const res = await paintingAdminService.create(payload);
+        savedId = res.data?.paintingId;
       }
+
+      // Upload image to MinIO if a file was selected
+      if (imageFile && savedId) {
+        try {
+          await paintingAdminService.uploadImage(savedId, imageFile);
+          setSuccess(`Schilderij opgeslagen en afbeelding geüpload met sleutel: ${form.imageRecognitionKey}`);
+        } catch {
+          setImageUploadWarning(
+            `Schilderij opgeslagen, maar afbeelding uploaden mislukt. ` +
+            `Upload het bestand handmatig naar MinIO met de sleutel: paintings/${form.imageRecognitionKey}.jpg`
+          );
+        }
+      } else {
+        setSuccess(editingId ? "Schilderij bijgewerkt." : "Schilderij aangemaakt.");
+      }
+
       setForm(emptyForm);
       setEditingId(null);
+      clearImage();
       await loadPaintings();
     } catch (e) {
       setError("Opslaan van schilderij mislukt: " + e.message);
@@ -108,6 +159,9 @@ const PaintingsAdmin = () => {
       infoText: painting.infoText || "",
       externalLink: painting.externalLink || "",
     });
+    clearImage();
+    setSuccess("");
+    setError("");
   };
 
   const handleDelete = async (id) => {
@@ -127,152 +181,173 @@ const PaintingsAdmin = () => {
   const handleCancelEdit = () => {
     setEditingId(null);
     setForm(emptyForm);
+    clearImage();
+    setSuccess("");
+    setError("");
   };
+
+  const inputClass = (hasError) =>
+    `mt-1 block w-full rounded-lg border ${
+      hasError ? "border-red-400" : "border-[#2c3e54]/15 focus:border-[#2c3e54]"
+    } bg-[#f4f1e9]/40 px-3 py-2 text-sm text-[#2c3e54] placeholder-[#2c3e54]/30 focus:outline-none focus:ring-1 focus:ring-[#2c3e54]/20 transition-all`;
 
   return (
     <div className="min-h-screen bg-[#f4f1e9] text-[#2c3e54]">
+      {/* Navbar */}
       <nav className="bg-white shadow-sm border-b border-[#2c3e54]/10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
-          <h1 className="text-xl font-bold text-[#2c3e54]">Schilderijbeheer</h1>
-          <div className="flex items-center space-x-4">
-            <Link to="/admin" className="text-sm text-[#2c3e54] hover:underline">
-              Admin Home
-            </Link>
-            <Link to="/" className="text-sm text-[#2c3e54] hover:underline">
-              Home
-            </Link>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 bg-[#2c3e54] rounded-md flex items-center justify-center text-white font-bold text-sm">Q</div>
+            <span className="font-bold text-[#2c3e54]">Schilderijbeheer</span>
+          </div>
+          <div className="flex items-center gap-4 text-sm">
+            <Link to="/admin" className="text-[#2c3e54]/60 hover:text-[#2c3e54] transition-colors">Admin</Link>
+            <Link to="/" className="text-[#2c3e54]/60 hover:text-[#2c3e54] transition-colors">Home</Link>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-5xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          <section className="lg:col-span-1 bg-white rounded-lg shadow p-4 border border-[#2c3e54]/10 h-fit">
-            <h2 className="text-lg font-semibold mb-4 text-[#2c3e54]">
-              {editingId ? "Schilderij Bewerken" : "Schilderij Aanmaken"}
+      <main className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+          {/* Form */}
+          <section className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-[#2c3e54]/10 p-6 h-fit">
+            <h2 className="text-base font-bold text-[#2c3e54] mb-5">
+              {editingId ? "Schilderij bewerken" : "Schilderij aanmaken"}
             </h2>
+
             {error && (
-              <p className="mb-2 text-sm text-red-600">{error}</p>
+              <div className="mb-4 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm">{error}</div>
             )}
+            {success && (
+              <div className="mb-4 bg-green-50 border border-green-100 text-green-700 px-4 py-3 rounded-xl text-sm">{success}</div>
+            )}
+            {imageUploadWarning && (
+              <div className="mb-4 bg-amber-50 border border-amber-100 text-amber-700 px-4 py-3 rounded-xl text-sm flex gap-2">
+                <AlertIcon />
+                <span>{imageUploadWarning}</span>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-3 text-sm">
               <div>
-                <label className="block font-medium text-[#2c3e54]">Museum</label>
+                <label className="block font-medium text-[#2c3e54] mb-1">Museum</label>
                 <select
                   name="museumId"
                   value={form.museumId}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-cyan-900"
+                  className={inputClass(false) + " bg-white"}
                   required
                 >
                   <option value="">Selecteer een museum...</option>
                   {museums.map((m) => (
-                    <option key={m.museumId} value={m.museumId}>
-                      {m.name}
-                    </option>
+                    <option key={m.museumId} value={m.museumId}>{m.name}</option>
                   ))}
                 </select>
               </div>
+
               <div>
-                <label className="block font-medium text-[#2c3e54]">Titel</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={form.title}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-900"
-                  required
-                />
+                <label className="block font-medium text-[#2c3e54] mb-1">Titel</label>
+                <input type="text" name="title" value={form.title} onChange={handleChange}
+                  className={inputClass(false)} required placeholder="De Nachtwacht" />
               </div>
+
               <div>
-                <label className="block font-medium text-[#2c3e54]">Artiest</label>
-                <input
-                  type="text"
-                  name="artist"
-                  value={form.artist}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-900"
-                />
+                <label className="block font-medium text-[#2c3e54] mb-1">Artiest</label>
+                <input type="text" name="artist" value={form.artist} onChange={handleChange}
+                  className={inputClass(false)} placeholder="Rembrandt van Rijn" />
               </div>
-              <div>
-                <label className="block font-medium text-[#2c3e54]">Jaar</label>
-                <input
-                  type="number"
-                  name="year"
-                  value={form.year}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-900"
-                />
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-medium text-[#2c3e54] mb-1">Jaar</label>
+                  <input type="number" name="year" value={form.year} onChange={handleChange}
+                    className={inputClass(false)} placeholder="1642" />
+                </div>
+                <div>
+                  <label className="block font-medium text-[#2c3e54] mb-1">Museumlabel</label>
+                  <input type="text" name="museumLabel" value={form.museumLabel} onChange={handleChange}
+                    className={inputClass(false)} placeholder="SK-C-5" />
+                </div>
               </div>
+
+              {/* Image upload */}
               <div>
-                <label className="block font-medium text-[#2c3e54]">
-                  Museumlabel
+                <label className="block font-medium text-[#2c3e54] mb-1">
+                  Afbeelding <span className="font-normal text-[#2c3e54]/50">(voor MinIO)</span>
                 </label>
+                {imagePreview ? (
+                  <div className="relative rounded-xl overflow-hidden border border-[#2c3e54]/10 mb-2">
+                    <img src={imagePreview} alt="Preview" className="w-full h-32 object-cover" />
+                    <button
+                      type="button"
+                      onClick={clearImage}
+                      className="absolute top-2 right-2 bg-white/90 text-[#2c3e54] rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold hover:bg-white transition-colors shadow"
+                    >✕</button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full border-2 border-dashed border-[#2c3e54]/20 rounded-xl py-4 flex flex-col items-center gap-1 text-[#2c3e54]/50 hover:border-[#2c3e54]/40 hover:text-[#2c3e54]/70 transition-colors cursor-pointer"
+                  >
+                    <ImageIcon />
+                    <span className="text-xs">Klik om een afbeelding te kiezen</span>
+                  </button>
+                )}
                 <input
-                  type="text"
-                  name="museumLabel"
-                  value={form.museumLabel}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-900"
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
                 />
               </div>
+
               <div>
-                <label className="block font-medium text-[#2c3e54]">
-                  Beeldherkenningssleutel (Key)
+                <label className="block font-medium text-[#2c3e54] mb-1">
+                  Beeldherkenningssleutel
                 </label>
-                <input
-                  type="text"
-                  name="imageRecognitionKey"
-                  value={form.imageRecognitionKey}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-900"
-                />
+                <input type="text" name="imageRecognitionKey" value={form.imageRecognitionKey}
+                  onChange={handleChange} className={inputClass(false)}
+                  placeholder="nachtwacht-rembrandt" />
+                <p className="mt-1 text-xs text-[#2c3e54]/40">
+                  Wordt als bestandsnaam in MinIO gebruikt: <code>paintings/[sleutel].jpg</code>
+                </p>
               </div>
+
               <div>
-                <label className="block font-medium text-[#2c3e54]">Info Titel</label>
-                <input
-                  type="text"
-                  name="infoTitle"
-                  value={form.infoTitle}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-900"
-                />
+                <label className="block font-medium text-[#2c3e54] mb-1">Info titel</label>
+                <input type="text" name="infoTitle" value={form.infoTitle} onChange={handleChange}
+                  className={inputClass(false)} placeholder="Over dit schilderij" />
               </div>
+
               <div>
-                <label className="block font-medium text-[#2c3e54]">Info Tekst</label>
-                <textarea
-                  name="infoText"
-                  value={form.infoText}
-                  onChange={handleChange}
-                  rows={3}
-                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-900"
-                />
+                <label className="block font-medium text-[#2c3e54] mb-1">Info tekst</label>
+                <textarea name="infoText" value={form.infoText} onChange={handleChange}
+                  rows={3} className={inputClass(false)} placeholder="Beschrijving van het schilderij..." />
               </div>
+
               <div>
-                <label className="block font-medium text-[#2c3e54]">
-                  Externe Link
-                </label>
-                <input
-                  type="url"
-                  name="externalLink"
-                  value={form.externalLink}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border border-[#2c3e54]/20 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-900"
-                />
+                <label className="block font-medium text-[#2c3e54] mb-1">Externe link</label>
+                <input type="url" name="externalLink" value={form.externalLink} onChange={handleChange}
+                  className={inputClass(false)} placeholder="https://..." />
               </div>
-              <div className="flex flex-col space-y-2 pt-2">
+
+              <div className="flex flex-col gap-2 pt-2">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="block w-full text-center px-3 py-2 rounded-md border border-cyan-900 text-cyan-950 text-sm font-medium hover:bg-cyan-900 hover:text-white transition-colors disabled:opacity-50"
+                  className="w-full py-2.5 rounded-xl bg-[#2c3e54] text-white font-semibold text-sm hover:bg-[#2c3e54]/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {editingId ? "Wijzigingen opslaan" : "Aanmaken"}
+                  {imageFile && <UploadIcon />}
+                  {editingId ? "Wijzigingen opslaan" : "Schilderij aanmaken"}
                 </button>
                 {editingId && (
                   <button
                     type="button"
                     onClick={handleCancelEdit}
-                    className="block w-full text-center px-3 py-2 rounded-md border border-[#2c3e54]/20 text-[#2c3e54] text-sm font-medium hover:bg-[#f4f1e9] transition-colors"
+                    className="w-full py-2.5 rounded-xl border border-[#2c3e54]/20 text-[#2c3e54]/70 font-semibold text-sm hover:bg-[#f4f1e9] transition-colors"
                   >
                     Annuleren
                   </button>
@@ -281,56 +356,58 @@ const PaintingsAdmin = () => {
             </form>
           </section>
 
-          <section className="lg:col-span-2 bg-white rounded-lg shadow p-4 border border-[#2c3e54]/10">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-[#2c3e54]">Alle Schilderijen</h2>
+          {/* Table */}
+          <section className="lg:col-span-3 bg-white rounded-2xl shadow-sm border border-[#2c3e54]/10 p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-base font-bold text-[#2c3e54]">Alle schilderijen</h2>
               <button
                 type="button"
                 onClick={loadPaintings}
                 disabled={loading}
-                className="px-3 py-1 text-xs rounded bg-[#f4f1e9] text-[#2c3e54] hover:bg-[#ebe8de] transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 text-xs rounded-lg bg-[#f4f1e9] text-[#2c3e54] hover:bg-[#ebe8de] transition-colors disabled:opacity-50 font-medium"
               >
                 Vernieuwen
               </button>
             </div>
-            
-            {loading && (
-              <p className="text-sm text-[#2c3e54]/70">Laden...</p>
-            )}
+
+            {loading && <p className="text-sm text-[#2c3e54]/50">Laden...</p>}
             {!loading && paintings.length === 0 && (
-              <p className="text-sm text-[#2c3e54]/70">Geen schilderijen gevonden.</p>
+              <div className="text-center py-12 text-[#2c3e54]/40">
+                <ImageIcon />
+                <p className="mt-2 text-sm">Geen schilderijen gevonden.</p>
+              </div>
             )}
 
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-[#2c3e54]/10 text-xs">
+              <table className="min-w-full text-xs">
                 <thead>
-                  <tr className="text-[#2c3e54]/50">
-                    <th className="px-2 py-2 text-left font-medium">ID</th>
-                    <th className="px-2 py-2 text-left font-medium">Museum</th>
-                    <th className="px-2 py-2 text-left font-medium">Titel</th>
-                    <th className="px-2 py-2 text-left font-medium">Artiest</th>
-                    <th className="px-2 py-2 text-left font-medium">Label</th>
-                    <th className="px-2 py-2 text-right font-medium">Acties</th>
+                  <tr className="border-b border-[#2c3e54]/10">
+                    <th className="pb-2 px-3 text-left font-semibold text-[#2c3e54]/40 uppercase tracking-wide">ID</th>
+                    <th className="pb-2 px-3 text-left font-semibold text-[#2c3e54]/40 uppercase tracking-wide">Museum</th>
+                    <th className="pb-2 px-3 text-left font-semibold text-[#2c3e54]/40 uppercase tracking-wide">Titel</th>
+                    <th className="pb-2 px-3 text-left font-semibold text-[#2c3e54]/40 uppercase tracking-wide">Artiest</th>
+                    <th className="pb-2 px-3 text-left font-semibold text-[#2c3e54]/40 uppercase tracking-wide">Label</th>
+                    <th className="pb-2 px-3 text-right font-semibold text-[#2c3e54]/40 uppercase tracking-wide">Acties</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#2c3e54]/10">
+                <tbody className="divide-y divide-[#2c3e54]/5">
                   {paintings.map((p) => (
-                    <tr key={p.paintingId}>
-                      <td className="px-2 py-3 whitespace-nowrap font-mono">{p.paintingId}</td>
-                      <td className="px-2 py-3 whitespace-nowrap text-[#2c3e54]/70">{getMuseumName(p.museumId)}</td>
-                      <td className="px-2 py-3 whitespace-nowrap font-medium text-[#2c3e54]">{p.title}</td>
-                      <td className="px-2 py-3 whitespace-nowrap text-[#2c3e54]/70">{p.artist}</td>
-                      <td className="px-2 py-3 whitespace-nowrap text-[#2c3e54]/70">{p.museumLabel}</td>
-                      <td className="px-2 py-3 whitespace-nowrap text-right space-x-2">
+                    <tr key={p.paintingId} className="hover:bg-[#f4f1e9]/50 transition-colors">
+                      <td className="px-3 py-3 font-mono text-[#2c3e54]/40">{p.paintingId}</td>
+                      <td className="px-3 py-3 text-[#2c3e54]/60">{getMuseumName(p.museumId)}</td>
+                      <td className="px-3 py-3 font-medium text-[#2c3e54]">{p.title}</td>
+                      <td className="px-3 py-3 text-[#2c3e54]/60">{p.artist}</td>
+                      <td className="px-3 py-3 text-[#2c3e54]/60">{p.museumLabel}</td>
+                      <td className="px-3 py-3 text-right space-x-3">
                         <button
                           onClick={() => handleEdit(p)}
-                          className="text-blue-600 hover:underline font-medium"
+                          className="text-[#2c3e54] hover:underline font-semibold"
                         >
                           Bewerken
                         </button>
                         <button
                           onClick={() => handleDelete(p.paintingId)}
-                          className="text-red-600 hover:underline font-medium"
+                          className="text-red-500 hover:underline font-semibold"
                         >
                           Verwijderen
                         </button>
