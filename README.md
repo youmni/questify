@@ -3,8 +3,6 @@
 ## Overview
 **Questify** is a photo-based scavenger hunt in the Oldmasters Museum in Brussels, where users must find paintings using standard and optional extra hints, then scan them as proof to move on to the next artwork. After each successful scan, additional background information about the painting is revealed so the user can learn more. At the end, the app provides an overview of all discovered paintings along with their supplementary information.
 
-4545
-
 ## Technologies
 1. **Docker**: Used for building the backend of the application.
 2. **MySQL**: Used for managing the database.
