@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import museumService from "../services/museumService";
 import paintingService from "../services/paintingService";
 import progressService from "../services/progressService";
+import QuestNav from "../components/QuestNav";
 
 const RouteDetail = () => {
   const { museumId, routeId } = useParams();
@@ -12,26 +13,27 @@ const RouteDetail = () => {
   const [error, setError] = useState("");
   const [hintsByPainting, setHintsByPainting] = useState({});
   const [progress, setProgress] = useState(null);
+  const [restarting, setRestarting] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const [routeRes, progressRes] = await Promise.all([
+        museumService.getRouteDetails(museumId, routeId),
+        progressService.getForRoute(routeId),
+      ]);
+
+      setRoute(routeRes.data || null);
+      setProgress(progressRes.data || null);
+    } catch {
+      setError("Kon route details niet laden");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const [routeRes, progressRes] = await Promise.all([
-          museumService.getRouteDetails(museumId, routeId),
-          progressService.getForRoute(routeId),
-        ]);
-
-        setRoute(routeRes.data || null);
-        setProgress(progressRes.data || null);
-      } catch (e) {
-        setError("Kon route details niet laden");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (museumId && routeId) {
       load();
     }
@@ -47,11 +49,7 @@ const RouteDetail = () => {
       if (!route?.stops) return;
 
       const uniquePaintingIds = Array.from(
-        new Set(
-          route.stops
-            .map((s) => s.paintingId)
-            .filter((id) => id != null)
-        )
+        new Set(route.stops.map((s) => s.paintingId).filter((id) => id != null))
       );
 
       if (uniquePaintingIds.length === 0) return;
@@ -62,7 +60,7 @@ const RouteDetail = () => {
             try {
               const res = await paintingService.getDetails(id);
               return [id, res.data];
-            } catch (e) {
+            } catch {
               return [id, null];
             }
           })
@@ -77,106 +75,196 @@ const RouteDetail = () => {
 
         setHintsByPainting(map);
       } catch {
-        // Hints are optional; ignore global errors here
+        // no-op
       }
     };
 
     loadHints();
   }, [route]);
 
+  const handleRestart = async () => {
+    if (!window.confirm("Weet je zeker dat je de route opnieuw wilt starten? Je voortgang wordt gewist.")) return;
+    setRestarting(true);
+    try {
+      await progressService.restartRoute(routeId);
+      await load();
+      navigate(`/quest/museums/${museumId}/routes/${routeId}/stops/1`);
+    } catch {
+      setError("Route herstarten mislukt. Probeer het opnieuw.");
+    } finally {
+      setRestarting(false);
+    }
+  };
+
+  const progressPct =
+    progress && progress.totalStops
+      ? Math.min(100, (progress.completedStops / progress.totalStops) * 100)
+      : 0;
+
+  if (progress?.isCompleted) {
+    return (
+      <div className="min-h-screen bg-[#f4f1e9] text-[#2c3e54] px-4 py-8">
+        <div className="max-w-3xl mx-auto">
+          <QuestNav museumId={museumId} routeId={routeId} />
+
+          <div className="bg-white border border-[#2c3e54]/10 rounded-3xl p-6 sm:p-8 shadow-[0_10px_40px_rgba(44,62,84,0.05)]">
+            <div className="flex flex-col items-center text-center mb-8">
+              <div className="w-20 h-20 rounded-full bg-[#2c3e54] text-[#f4f1e9] flex items-center justify-center text-4xl mb-4">
+                🏆
+              </div>
+              <p className="text-xs font-bold uppercase tracking-widest text-[#2c3e54]/60 mb-2">Route voltooid</p>
+              <h1 className="text-3xl font-bold text-[#2c3e54] mb-2">Gefeliciteerd!</h1>
+              <p className="text-sm text-[#2c3e54]/70 max-w-md">
+                Je hebt alle {progress.totalStops} schilderijen gevonden op de route <span className="font-semibold">{route?.name}</span>.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              <div className="rounded-2xl border border-[#2c3e54]/10 bg-[#f4f1e9] p-4 text-center">
+                <p className="text-2xl font-bold text-[#2c3e54]">{progress.totalStops}</p>
+                <p className="text-xs text-[#2c3e54]/60 mt-0.5">Schilderijen</p>
+              </div>
+              <div className="rounded-2xl border border-[#2c3e54]/10 bg-[#f4f1e9] p-4 text-center">
+                <p className="text-2xl font-bold text-[#2c3e54]">100%</p>
+                <p className="text-xs text-[#2c3e54]/60 mt-0.5">Voltooid</p>
+              </div>
+              <div className="rounded-2xl border border-[#2c3e54]/10 bg-[#f4f1e9] p-4 text-center">
+                <p className="text-2xl font-bold text-[#2c3e54]">✓</p>
+                <p className="text-xs text-[#2c3e54]/60 mt-0.5">Klaar</p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[#2c3e54]/10 p-5 mb-6">
+              <p className="text-xs font-bold uppercase tracking-widest text-[#2c3e54]/60 mb-4">Gevonden schilderijen</p>
+              <div className="space-y-2">
+                {sortedStops.map((stop) => {
+                  const detail = hintsByPainting[stop.paintingId];
+                  const title = detail?.title || `Stop ${stop.sequenceNumber}`;
+                  const artist = detail?.artist || "";
+                  return (
+                    <div key={stop.routeStopId} className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-full bg-[#2c3e54] text-[#f4f1e9] flex items-center justify-center shrink-0 text-xs font-bold">✓</div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-[#2c3e54] truncate">{title}</p>
+                        {artist && <p className="text-xs text-[#2c3e54]/60 truncate">{artist}</p>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Link
+                to="/"
+                className="w-full flex items-center justify-center gap-2 bg-[#2c3e54] hover:bg-[#233247] text-[#f4f1e9] font-bold py-4 rounded-xl transition-all text-center"
+              >
+                Terug naar home
+              </Link>
+              <button
+                type="button"
+                onClick={handleRestart}
+                disabled={restarting}
+                className="w-full border border-[#2c3e54]/20 hover:border-[#2c3e54]/40 text-[#2c3e54] font-semibold py-3.5 rounded-xl transition-all text-sm disabled:opacity-50 bg-white"
+              >
+                {restarting ? "Route wordt herstart..." : "Route opnieuw starten"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#f8f4ec] text-[#2c3e54]">
-      <main className="max-w-3xl mx-auto px-4 pb-12">
-        <div className="pt-6 pb-4 flex items-center text-xs text-[#8a8579]">
+    <div className="min-h-screen bg-[#f4f1e9] text-[#2c3e54] px-4 py-8">
+      <div className="max-w-3xl mx-auto">
+        <QuestNav museumId={museumId} routeId={routeId} />
+
+        <div className="mb-5">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1 hover:underline"
+            className="flex items-center gap-1.5 text-[#2c3e54]/70 hover:text-[#2c3e54] text-sm font-semibold"
           >
-            <span>←</span>
-            <span>Terug</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 5l-7 7 7 7" />
+            </svg>
+            Terug
           </button>
         </div>
 
-        <header className="text-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-serif font-semibold mb-1">
-            Voortgang
-          </h1>
-          <p className="text-xs sm:text-sm text-[#6d6a64]">
-            {progress
-              ? `${progress.completedStops} van ${progress.totalStops} schilderijen gevonden`
-              : "Schilderijen gevonden"}
-          </p>
-        </header>
+        <div className="bg-white border border-[#2c3e54]/10 rounded-3xl p-6 sm:p-8 shadow-[0_10px_40px_rgba(44,62,84,0.05)] mb-5">
+          <div className="text-center mb-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#2c3e54]/60 mb-1">{route?.name || "Route"}</p>
+            <h1 className="text-3xl font-bold text-[#2c3e54]">Voortgang</h1>
+            {progress && (
+              <p className="text-sm text-[#2c3e54]/70 mt-1">
+                {progress.completedStops} van {progress.totalStops} schilderijen gevonden
+              </p>
+            )}
+          </div>
 
-        {/* Progress bar */}
-        {progress && (
-          <div className="mb-6">
-            <div className="h-1 rounded-full bg-[#e5ddcf] overflow-hidden">
-              <div
-                className="h-full bg-[#c4952c] transition-all"
-                style={{
-                  width: `${
-                    progress.totalStops
-                      ? Math.min(
-                          100,
-                          (progress.completedStops / progress.totalStops) * 100
-                        )
-                      : 0
-                  }%`,
-                }}
-              />
+          {progress && (
+            <div>
+              <div className="h-2 rounded-full bg-[#f4f1e9] overflow-hidden border border-[#2c3e54]/10">
+                <div
+                  className="h-full bg-[#2c3e54] rounded-full transition-all duration-700"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+              <div className="flex justify-between mt-1 text-[11px] text-[#2c3e54]/60">
+                <span>Start</span>
+                <span>{Math.round(progressPct)}%</span>
+                <span>Einde</span>
+              </div>
             </div>
+          )}
+        </div>
+
+        {loading && (
+          <div className="bg-white border border-[#2c3e54]/10 rounded-2xl px-5 py-10 text-center text-sm text-[#2c3e54]/70">
+            Laden...
           </div>
         )}
 
-        {/* Congrats banner when complete */}
-        {progress && progress.isCompleted && (
-          <section className="mb-4 rounded-xl border border-[#e8d8b0] bg-[#fbf3de] px-5 py-4 flex items-center gap-3 text-xs sm:text-sm text-[#6d5a32]">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f1dfb3] text-[#6d5a32]">
-              🏆
-            </div>
-            <div>
-              <p className="font-semibold mb-0.5">Gefeliciteerd!</p>
-              <p>Je hebt alle schilderijen gevonden!</p>
-            </div>
-          </section>
+        {error && (
+          <div className="bg-red-50 border border-red-100 text-red-600 rounded-2xl px-5 py-4 text-sm mb-4">
+            {error}
+          </div>
         )}
 
-        {loading && <p className="text-sm text-[#6d6a64]">Laden...</p>}
-        {error && <p className="text-sm text-red-600">{error}</p>}
-
-        {/* Stops list */}
         {sortedStops.length > 0 && (
-          <section className="space-y-3 mt-4">
+          <div className="space-y-3">
             {sortedStops.map((stop) => {
               const detail = hintsByPainting[stop.paintingId];
-              const isCompleted =
-                progress?.completedPaintingIds?.includes(stop.paintingId);
-
+              const isCompleted = progress?.completedPaintingIds?.includes(stop.paintingId);
               const title = detail?.title || `Stop ${stop.sequenceNumber}`;
               const subtitle = detail?.artist || "";
 
               return (
                 <article
                   key={stop.routeStopId}
-                  className="bg-[#fdfaf4] rounded-xl border border-[#e5ddcf] px-4 sm:px-6 py-4 flex items-center justify-between gap-4"
+                  className={`rounded-2xl border px-4 sm:px-5 py-4 flex items-center justify-between gap-4 transition-all ${
+                    isCompleted
+                      ? "bg-[#f4f1e9] border-[#2c3e54]/20"
+                      : "bg-white border-[#2c3e54]/10"
+                  }`}
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f3e7cf]">
-                      <span className={isCompleted ? "text-green-600" : "text-[#c4952c]"}>
-                        {isCompleted ? "✔" : stop.sequenceNumber}
-                      </span>
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-full font-bold text-sm shrink-0 ${
+                        isCompleted
+                          ? "bg-[#2c3e54] text-[#f4f1e9]"
+                          : "bg-[#f4f1e9] border border-[#2c3e54]/15 text-[#2c3e54]/70"
+                      }`}
+                    >
+                      {isCompleted ? "✓" : stop.sequenceNumber}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm sm:text-base font-medium text-[#2c3e54] truncate">
-                        {title}
-                      </p>
-                      <p className="text-xs text-[#8a8579] truncate">
-                        {subtitle ||
-                          (isCompleted
-                            ? "Gevonden"
-                            : "Nog niet gevonden")}
+                      <p className="text-sm sm:text-base font-semibold truncate text-[#2c3e54]">{title}</p>
+                      <p className="text-xs truncate text-[#2c3e54]/60">
+                        {subtitle || (isCompleted ? "Gevonden" : "Nog te vinden")}
                       </p>
                     </div>
                   </div>
@@ -184,27 +272,38 @@ const RouteDetail = () => {
                   <button
                     type="button"
                     onClick={() =>
-                      navigate(
-                        `/quest/museums/${museumId}/routes/${routeId}/stops/${stop.sequenceNumber}`
-                      )
+                      navigate(`/quest/museums/${museumId}/routes/${routeId}/stops/${stop.sequenceNumber}`)
                     }
-                    className="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#e5ddcf] text-[#c4952c] text-lg leading-none hover:bg-[#f8f0dd]"
+                    className="shrink-0 flex items-center justify-center w-9 h-9 rounded-full border border-[#2c3e54]/20 text-[#2c3e54] hover:border-[#2c3e54]/40 bg-white"
                     aria-label="Ga naar stop"
                   >
-                    +
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
                   </button>
                 </article>
               );
             })}
-          </section>
+          </div>
         )}
 
         {!loading && !error && route && sortedStops.length === 0 && (
-          <p className="mt-4 text-sm text-[#6d6a64]">
-            Deze route heeft nog geen stops met schilderijen.
-          </p>
+          <p className="text-center py-12 text-[#2c3e54]/60 text-sm">Deze route heeft nog geen stops.</p>
         )}
-      </main>
+
+        {progress && !progress.isCompleted && progress.completedStops > 0 && (
+          <div className="mt-8 pt-6">
+            <button
+              type="button"
+              onClick={handleRestart}
+              disabled={restarting}
+              className="w-full border border-[#2c3e54]/20 hover:border-[#2c3e54]/40 text-[#2c3e54] text-sm font-semibold py-3 rounded-xl transition-all disabled:opacity-50 bg-white"
+            >
+              {restarting ? "Route wordt herstart..." : "Route opnieuw starten"}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

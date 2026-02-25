@@ -56,4 +56,17 @@ public class RouteProgressController {
     ) {
         return ResponseEntity.ok(progressService.getOrCreateProgress(user.getId(), routeId));
     }
+
+    /**
+     * POST /api/progress/routes/{routeId}/restart
+     * Restart a route: resets progress and clears all scans
+     */
+    @AllowAuthenticated
+    @PostMapping("/routes/{routeId}/restart")
+    public ResponseEntity<RouteProgressDTO> restartRoute(
+            @PathVariable Long routeId,
+            @AuthenticationPrincipal User user
+    ) {
+        return ResponseEntity.ok(progressService.restartRoute(user.getId(), routeId));
+    }
 }
