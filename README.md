@@ -31,6 +31,10 @@ https://chatgpt.com/share/69850dac-bc98-8007-a925-feb38e87e68a - Mapper fixes
 
 https://gemini.google.com/share/a51b1dc0ab5e - Frontend
 
+![Alt-tekst](/screenshots/Screenshot%202026-02-25%20192440.png)
+![Alt-tekst](/screenshots/Screenshot%202026-02-25%20200842.png)
+![Alt-tekst](/screenshots/Screenshot%202026-02-25%20202922.png)
+
 ## Authors
 - [@Youmni Malha](https://github.com/Youmni)
 - [@Brent Vanroelen](https://github.com/brentvanroelen)
