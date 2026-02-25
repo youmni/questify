@@ -4,6 +4,7 @@ import museumService from "../services/museumService";
 import paintingService from "../services/paintingService";
 import verificationService from "../services/verificationService";
 import progressService from "../services/progressService";
+import QuestNav from "../components/QuestNav";
 
 const CameraIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -33,6 +34,7 @@ const StopScan = () => {
   const [route, setRoute] = useState(null);
   const [stop, setStop] = useState(null);
   const [paintingDetail, setPaintingDetail] = useState(null);
+  const [progress, setProgress] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -56,11 +58,16 @@ const StopScan = () => {
         try {
           await progressService.startOrResumeRoute(routeId);
         } catch {
-          // Progress is helpful but not required
+          // no-op
         }
 
-        const res = await museumService.getRouteDetails(museumId, routeId);
-        const routeData = res.data;
+        const [routeRes, progressRes] = await Promise.all([
+          museumService.getRouteDetails(museumId, routeId),
+          progressService.getForRoute(routeId),
+        ]);
+
+        const routeData = routeRes.data;
+        setProgress(progressRes.data || null);
         const number = parseInt(stopNumber, 10);
 
         const foundStop = (routeData.stops || []).find(
@@ -81,7 +88,7 @@ const StopScan = () => {
             const detailRes = await paintingService.getDetails(foundStop.paintingId);
             setPaintingDetail(detailRes.data);
           } catch {
-            // Hints are optional
+            // no-op
           }
         }
       } catch {
@@ -95,6 +102,14 @@ const StopScan = () => {
       load();
     }
   }, [museumId, routeId, stopNumber]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const allHints = useMemo(() => {
     if (!paintingDetail) return [];
@@ -115,9 +130,18 @@ const StopScan = () => {
     return route.stops ? route.stops.length : 0;
   }, [route]);
 
+  const completedPaintingIds = useMemo(() => {
+    return new Set(progress?.completedPaintingIds || []);
+  }, [progress]);
+
+  const isAlreadyFound = Boolean(stop?.paintingId && completedPaintingIds.has(stop.paintingId));
+
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
     setSelectedFile(file);
     setResultMessage("");
     setIsMatch(null);
@@ -151,6 +175,13 @@ const StopScan = () => {
       if (data.paintingDetails) {
         setVerifiedPainting(data.paintingDetails);
       }
+
+      try {
+        const updated = await progressService.getForRoute(routeId);
+        setProgress(updated.data || null);
+      } catch {
+        // no-op
+      }
     } catch {
       setIsMatch(false);
       setResultMessage("Er ging iets mis bij het scannen. Probeer het later opnieuw.");
@@ -166,249 +197,215 @@ const StopScan = () => {
     navigate(`/quest/museums/${museumId}/routes/${routeId}/stops/${nextNumber}`);
   };
 
+  const goToPreviousStop = () => {
+    if (!stop) return;
+    const prevNumber = (stop.sequenceNumber || 0) - 1;
+    if (prevNumber < 1) return;
+    navigate(`/quest/museums/${museumId}/routes/${routeId}/stops/${prevNumber}`);
+  };
+
+  const stopQuest = () => {
+    navigate(`/quest/museums/${museumId}/routes/${routeId}`);
+  };
+
   const isLastStop = stop && totalStops && stop.sequenceNumber >= totalStops;
+  const isFirstStop = stop && stop.sequenceNumber <= 1;
+  const activePainting = verifiedPainting || paintingDetail;
 
   return (
-    <div className="min-h-screen bg-[#1c2e45] text-[#f4f0e8] flex flex-col">
-      <div className="h-1 bg-gradient-to-r from-[#c4952c] via-[#e8b84b] to-[#c4952c]" />
+    <div className="min-h-screen bg-[#f4f1e9] text-[#2c3e54] flex flex-col">
+      <div className="max-w-2xl mx-auto w-full px-4 pt-5 pb-10">
+        <QuestNav museumId={museumId} routeId={routeId} />
 
-      {/* Nav */}
-      <div className="max-w-2xl mx-auto w-full px-4 pt-4 flex items-center justify-between">
-        <Link
-          to={`/quest/museums/${museumId}/routes/${routeId}`}
-          className="flex items-center gap-1.5 text-[#8a9ab0] hover:text-[#f4f0e8] text-sm transition-colors"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-          Terug naar route
-        </Link>
-        {totalStops > 0 && stop && (
-          <div className="flex items-center gap-1.5">
-            {Array.from({ length: totalStops }, (_, i) => (
-              <div
-                key={i}
-                className={`h-1.5 rounded-full transition-all ${
-                  i + 1 < stop.sequenceNumber
-                    ? "w-4 bg-[#c4952c]"
-                    : i + 1 === stop.sequenceNumber
-                    ? "w-6 bg-[#e8b84b]"
-                    : "w-4 bg-[#2c4a6a]"
-                }`}
-              />
-            ))}
+        <div className="flex items-center justify-between mb-5">
+          <Link
+            to={`/quest/museums/${museumId}/routes/${routeId}`}
+            className="flex items-center gap-1.5 text-[#2c3e54]/70 hover:text-[#2c3e54] text-sm font-semibold"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 5l-7 7 7 7" />
+            </svg>
+            Terug naar route
+          </Link>
+          <button
+            type="button"
+            onClick={stopQuest}
+            className="rounded-xl border border-[#2c3e54]/20 bg-white px-3 py-2 text-xs font-bold text-[#2c3e54] hover:border-[#2c3e54]/40"
+          >
+            Speurtocht stoppen
+          </button>
+        </div>
+
+        {loading && (
+          <div className="bg-white border border-[#2c3e54]/10 rounded-2xl px-5 py-12 text-center text-sm text-[#2c3e54]/70">
+            Stop wordt geladen...
           </div>
         )}
-      </div>
 
-      <main className="flex-1 flex flex-col items-center px-4 pb-10 pt-6">
-        <div className="w-full max-w-2xl">
+        {!loading && error && (
+          <div className="bg-red-50 border border-red-100 text-red-600 rounded-2xl px-5 py-4 text-sm">
+            {error}
+          </div>
+        )}
 
-          {loading && (
-            <div className="flex items-center justify-center py-20 text-[#8a9ab0] text-sm">
-              Stop wordt geladen...
+        {!loading && !error && stop && (
+          <>
+            <div className="bg-white border border-[#2c3e54]/10 rounded-2xl p-5 shadow-[0_10px_40px_rgba(44,62,84,0.05)] mb-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-[#2c3e54]/60 mb-1">
+                Stop {stop.sequenceNumber} van {totalStops}
+              </p>
+              <h1 className="text-2xl font-bold text-[#2c3e54]">{route?.name}</h1>
+              <p className="text-sm text-[#2c3e54]/60 mt-1">
+                {progress?.completedStops || 0} van {progress?.totalStops || totalStops} gevonden
+              </p>
             </div>
-          )}
 
-          {!loading && error && (
-            <div className="bg-red-900/30 border border-red-500/30 text-red-300 rounded-2xl px-5 py-4 text-sm">
-              {error}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <button
+                type="button"
+                disabled={isFirstStop}
+                onClick={goToPreviousStop}
+                className="rounded-xl border border-[#2c3e54]/20 bg-white px-4 py-3 text-sm font-bold text-[#2c3e54] disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                ← Vorige stop
+              </button>
+              <button
+                type="button"
+                disabled={isLastStop}
+                onClick={goToNextStop}
+                className="rounded-xl border border-[#2c3e54]/20 bg-white px-4 py-3 text-sm font-bold text-[#2c3e54] disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Volgende stop →
+              </button>
             </div>
-          )}
 
-          {!loading && !error && stop && (
-            <>
-              {/* Stop header */}
-              {!isMatch && (
-                <div className="mb-6 text-center">
-                  <p className="text-[#c4952c] text-xs font-bold uppercase tracking-widest mb-1">
-                    Stop {stop.sequenceNumber} van {totalStops}
-                  </p>
-                  <h1 className="font-serif text-2xl font-bold text-[#f4f0e8]">{route?.name}</h1>
-                </div>
-              )}
-
-              {/* SUCCESS STATE */}
-              {isMatch && verifiedPainting && (
-                <div className="animate-in fade-in duration-500">
-                  {/* Success badge */}
-                  <div className="flex flex-col items-center mb-6 text-center">
-                    <div className="w-16 h-16 rounded-full bg-[#c4952c] flex items-center justify-center mb-3 shadow-lg">
+            {(isMatch || isAlreadyFound) && (
+              <div className="bg-white border border-[#2c3e54]/10 rounded-2xl overflow-hidden shadow-[0_10px_40px_rgba(44,62,84,0.05)] mb-4">
+                <div className="px-5 py-4 border-b border-[#2c3e54]/10 bg-[#f4f1e9]">
+                  <div className="flex items-center gap-2 text-[#2c3e54] font-bold">
+                    <div className="w-8 h-8 rounded-full bg-[#2c3e54] text-[#f4f1e9] flex items-center justify-center">
                       <CheckIcon />
                     </div>
-                    <h1 className="font-serif text-2xl font-bold text-[#f4f0e8]">Gevonden!</h1>
-                    <p className="text-[#8a9ab0] text-sm mt-1">Je hebt het schilderij correct geïdentificeerd</p>
+                    {isAlreadyFound && !isMatch ? "Al gevonden" : "Gevonden"}
                   </div>
-
-                  {/* Painting info card */}
-                  <div className="bg-[#fdf9f2] text-[#1c2e45] rounded-2xl overflow-hidden border border-[#e5ddcf] shadow-xl mb-5">
-                    <div className="bg-[#243a54] px-6 py-5">
-                      <h2 className="font-serif text-xl font-bold text-[#f4f0e8] mb-1">
-                        {verifiedPainting.title}
-                      </h2>
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-[#8a9ab0]">
-                        {verifiedPainting.artist && (
-                          <span className="flex items-center gap-1">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg>
-                            {verifiedPainting.artist}
-                          </span>
-                        )}
-                        {verifiedPainting.year && (
-                          <span className="flex items-center gap-1">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                            {verifiedPainting.year}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="px-6 py-5 space-y-3">
-                      {verifiedPainting.infoText && (
-                        <p className="text-sm leading-relaxed text-[#3a4a5a]">
-                          {verifiedPainting.infoText}
-                        </p>
-                      )}
-                      {verifiedPainting.infoTitle && (
-                        <div className="rounded-xl border border-[#f0e0b5] bg-[#fdf3d8] px-4 py-3 text-xs text-[#6d5a32]">
-                          <p className="font-bold mb-1">{verifiedPainting.infoTitle}</p>
-                          {verifiedPainting.extraHints?.[0]?.text && (
-                            <p>{verifiedPainting.extraHints[0].text}</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={isLastStop ? () => navigate(`/quest/museums/${museumId}/routes/${routeId}`) : goToNextStop}
-                    className="w-full bg-[#c4952c] hover:bg-[#d4a53c] text-[#1c2e45] font-bold py-4 rounded-xl transition-all shadow-lg"
-                  >
-                    {isLastStop ? "Route voltooien" : "Volgende stop →"}
-                  </button>
+                  <p className="text-sm text-[#2c3e54]/70 mt-2">
+                    {resultMessage || "Dit schilderij is correct geïdentificeerd."}
+                  </p>
                 </div>
-              )}
 
-              {/* SCAN STATE */}
-              {!isMatch && (
-                <div className="space-y-4">
-                  {/* Hint card */}
-                  <div className="bg-[#243a54] rounded-2xl border border-[#2c4a6a] p-5">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="text-[#c4952c]"><LightbulbIcon /></div>
-                      <p className="text-[11px] font-bold uppercase tracking-widest text-[#c4952c]">
-                        Hint {visibleHintCount > 1 ? `${visibleHintCount} van ${allHints.length}` : ""}
-                      </p>
-                    </div>
-
-                    {allHints.length > 0 ? (
-                      <div className="space-y-2">
-                        {allHints.slice(0, visibleHintCount).map((text, index) => (
-                          <p key={index} className="text-sm leading-relaxed text-[#c8d0dc]">
-                            {text}
-                          </p>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm leading-relaxed text-[#8a9ab0]">
-                        De hint voor deze stop is nog niet beschikbaar. Kijk goed rond in de zaal!
+                {activePainting && (
+                  <div className="px-5 py-4 space-y-2">
+                    <h2 className="text-lg font-bold text-[#2c3e54]">{activePainting.title}</h2>
+                    {(activePainting.artist || activePainting.year) && (
+                      <p className="text-sm text-[#2c3e54]/70">
+                        {[activePainting.artist, activePainting.year].filter(Boolean).join(" • ")}
                       </p>
                     )}
-
-                    {visibleHintCount < allHints.length && (
-                      <button
-                        type="button"
-                        onClick={() => setVisibleHintCount((c) => Math.min(c + 1, allHints.length))}
-                        className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-[#c4952c]/40 px-3 py-1 text-[11px] font-semibold text-[#c4952c] hover:bg-[#c4952c]/10 transition-colors"
-                      >
-                        <LightbulbIcon />
-                        Extra hint tonen
-                      </button>
+                    {activePainting.infoText && (
+                      <p className="text-sm leading-relaxed text-[#2c3e54]/80">{activePainting.infoText}</p>
                     )}
                   </div>
+                )}
+              </div>
+            )}
 
-                  {/* Upload card */}
-                  <div className="bg-[#243a54] rounded-2xl border border-[#2c4a6a] p-5">
-                    <p className="text-xs font-bold uppercase tracking-widest text-[#8a9ab0] mb-4">
-                      Scan het schilderij
+            {!isMatch && !isAlreadyFound && (
+              <div className="space-y-4">
+                <div className="bg-white border border-[#2c3e54]/10 rounded-2xl p-5 shadow-[0_10px_40px_rgba(44,62,84,0.05)]">
+                  <div className="flex items-center gap-2 mb-3 text-[#2c3e54]">
+                    <LightbulbIcon />
+                    <p className="text-xs font-bold uppercase tracking-widest">
+                      Hint {visibleHintCount > 1 ? `${visibleHintCount} van ${allHints.length}` : ""}
                     </p>
+                  </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      {/* Drop zone / preview */}
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full rounded-xl border-2 border-dashed border-[#2c4a6a] hover:border-[#c4952c] transition-colors overflow-hidden group"
-                      >
-                        {previewUrl ? (
-                          <div className="relative">
-                            <img
-                              src={previewUrl}
-                              alt="Geselecteerde foto"
-                              className="w-full h-48 object-cover"
-                            />
-                            <div className="absolute inset-0 bg-[#1c2e45]/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <div className="text-[#f4f0e8] text-sm font-semibold flex items-center gap-2">
-                                <CameraIcon />
-                                Andere foto kiezen
-                              </div>
-                            </div>
+                  {allHints.length > 0 ? (
+                    <div className="space-y-2">
+                      {allHints.slice(0, visibleHintCount).map((text, index) => (
+                        <p key={index} className="text-sm leading-relaxed text-[#2c3e54]/80">
+                          {text}
+                        </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm leading-relaxed text-[#2c3e54]/60">
+                      De hint voor deze stop is nog niet beschikbaar. Kijk goed rond in de zaal.
+                    </p>
+                  )}
+
+                  {visibleHintCount < allHints.length && (
+                    <button
+                      type="button"
+                      onClick={() => setVisibleHintCount((count) => Math.min(count + 1, allHints.length))}
+                      className="mt-3 rounded-full border border-[#2c3e54]/20 px-3 py-1 text-xs font-bold text-[#2c3e54] hover:border-[#2c3e54]/40"
+                    >
+                      Extra hint tonen
+                    </button>
+                  )}
+                </div>
+
+                <div className="bg-white border border-[#2c3e54]/10 rounded-2xl p-5 shadow-[0_10px_40px_rgba(44,62,84,0.05)]">
+                  <p className="text-xs font-bold uppercase tracking-widest text-[#2c3e54]/60 mb-4">Scan het schilderij</p>
+
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full rounded-xl border-2 border-dashed border-[#2c3e54]/20 hover:border-[#2c3e54]/40 overflow-hidden group"
+                    >
+                      {previewUrl ? (
+                        <div className="relative">
+                          <img
+                            src={previewUrl}
+                            alt="Geselecteerde foto"
+                            className="w-full h-52 object-cover"
+                          />
+                          <div className="absolute inset-0 bg-[#2c3e54]/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[#f4f1e9] text-sm font-semibold">
+                            Andere foto kiezen
                           </div>
-                        ) : (
-                          <div className="py-10 flex flex-col items-center gap-3">
-                            <div className="w-14 h-14 rounded-full bg-[#1c2e45] border border-[#2c4a6a] flex items-center justify-center text-[#c4952c] group-hover:border-[#c4952c] transition-colors">
-                              <CameraIcon />
-                            </div>
-                            <div className="text-center">
-                              <p className="text-sm font-semibold text-[#f4f0e8]">Foto maken of kiezen</p>
-                              <p className="text-xs text-[#6a7a90] mt-0.5">Zorg dat het schilderij goed in beeld is</p>
-                            </div>
+                        </div>
+                      ) : (
+                        <div className="py-10 flex flex-col items-center gap-3">
+                          <div className="w-14 h-14 rounded-full bg-[#f4f1e9] border border-[#2c3e54]/20 flex items-center justify-center text-[#2c3e54]">
+                            <CameraIcon />
                           </div>
-                        )}
-                      </button>
-
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        capture="environment"
-                        onChange={handleFileChange}
-                        className="hidden"
-                      />
-
-                      {resultMessage && isMatch === false && (
-                        <div className="flex items-start gap-3 bg-red-900/30 border border-red-500/30 text-red-300 rounded-xl px-4 py-3 text-sm">
-                          <svg className="shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
-                          </svg>
-                          <span>{resultMessage}</span>
+                          <div className="text-center">
+                            <p className="text-sm font-semibold text-[#2c3e54]">Foto maken of kiezen</p>
+                            <p className="text-xs text-[#2c3e54]/60 mt-0.5">Zorg dat het schilderij goed in beeld is</p>
+                          </div>
                         </div>
                       )}
+                    </button>
 
-                      <button
-                        type="submit"
-                        disabled={uploading || !selectedFile}
-                        className="w-full flex items-center justify-center gap-2 bg-[#c4952c] hover:bg-[#d4a53c] disabled:opacity-50 disabled:cursor-not-allowed text-[#1c2e45] font-bold py-3.5 rounded-xl transition-all"
-                      >
-                        {uploading ? (
-                          <>
-                            <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                            </svg>
-                            Foto wordt gecontroleerd...
-                          </>
-                        ) : (
-                          "Scan schilderij"
-                        )}
-                      </button>
-                    </form>
-                  </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+
+                    {resultMessage && isMatch === false && (
+                      <div className="bg-red-50 border border-red-100 text-red-600 rounded-xl px-4 py-3 text-sm">
+                        {resultMessage}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={uploading || !selectedFile}
+                      className="w-full bg-[#2c3e54] hover:bg-[#233247] text-[#f4f1e9] font-bold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {uploading ? "Foto wordt gecontroleerd..." : "Scan schilderij"}
+                    </button>
+                  </form>
                 </div>
-              )}
-            </>
-          )}
-        </div>
-      </main>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
