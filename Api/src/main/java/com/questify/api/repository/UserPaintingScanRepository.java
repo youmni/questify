@@ -19,7 +19,10 @@ public interface UserPaintingScanRepository extends JpaRepository<UserPaintingSc
     @Query("SELECT ups.painting.paintingId FROM UserPaintingScan ups " +
            "WHERE ups.user.id = :userId AND ups.route.routeId = :routeId")
     List<Long> findCompletedPaintingIdsByUserAndRoute(
-            @Param("userId") Long userId, 
+            @Param("userId") Long userId,
             @Param("routeId") Long routeId
     );
+
+    // Delete all scans for a user on a specific route (used for restart)
+    void deleteByUser_IdAndRoute_RouteId(Long userId, Long routeId);
 }
