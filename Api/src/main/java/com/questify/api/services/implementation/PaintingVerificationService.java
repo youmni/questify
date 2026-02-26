@@ -60,30 +60,33 @@ public class PaintingVerificationService {
                     userId, paintingId, routeId
             );
 
-            if (alreadyScanned) {
-                return ImageVerificationResponseDTO.builder()
-                        .isMatch(false)
-                        .confidenceScore(0.0)
-                        .message("Painting already scanned in this route")
-                        .build();
-            }
-
-            // Validate this is the current painting in the route
-            if (progress.getCurrentPainting() == null ||
-                    !progress.getCurrentPainting().getPaintingId().equals(paintingId)) {
-                return ImageVerificationResponseDTO.builder()
-                        .isMatch(false)
-                        .confidenceScore(0.0)
-                        .message("This is not the current painting in your route")
-                        .build();
-            }
+            boolean isCurrentStopPainting = progress.getCurrentPainting() != null
+                    && progress.getCurrentPainting().getPaintingId().equals(paintingId);
 
             // 2. Get painting reference image from MinIO
             Painting painting = paintingRepository.findById(paintingId)
                     .orElseThrow(() -> new RuntimeException("Painting not found"));
 
+            if (painting.getImageRecognitionKey() == null || painting.getImageRecognitionKey().isBlank()) {
+                return ImageVerificationResponseDTO.builder()
+                        .isMatch(false)
+                        .confidenceScore(0.0)
+                        .message("Dit schilderij heeft nog geen beeldherkenningssleutel. Neem contact op met de beheerder.")
+                        .build();
+            }
+
             String referenceImagePath = "paintings/" + painting.getImageRecognitionKey() + ".jpg";
-            String localReferencePath = minioStorageService.downloadImageToTemp(referenceImagePath);
+            String localReferencePath;
+            try {
+                localReferencePath = minioStorageService.downloadImageToTemp(referenceImagePath);
+            } catch (IllegalStateException e) {
+                return ImageVerificationResponseDTO.builder()
+                        .isMatch(false)
+                        .confidenceScore(0.0)
+                        .message("Er is nog geen referentieafbeelding beschikbaar voor dit schilderij. " +
+                                 "De beheerder moet eerst een afbeelding uploaden via het admin paneel.")
+                        .build();
+            }
 
             try {
                 // 3. Perform image comparison
@@ -94,19 +97,35 @@ public class PaintingVerificationService {
                         userId, paintingId, confidenceScore, isMatch);
 
                 if (isMatch) {
-                    // 4. Record successful scan
-                    recordSuccessfulScan(userId, routeId, paintingId, confidenceScore);
-
-                    // 5. Advance to next stop
-                    progressService.advanceToNextStop(userId, routeId);
-
-                    // 6. Return painting details
+                    // 4. Return painting details
                     PaintingDetailDTO details = museumService.getPaintingDetails(paintingId);
+
+                    // 5. Record and advance only when this is a new scan on the active stop
+                    if (!alreadyScanned && isCurrentStopPainting) {
+                        recordSuccessfulScan(userId, routeId, paintingId, confidenceScore);
+                        progressService.advanceToNextStop(userId, routeId);
+
+                        return ImageVerificationResponseDTO.builder()
+                                .isMatch(true)
+                                .confidenceScore(confidenceScore)
+                                .message("Successfully identified painting!")
+                                .paintingDetails(details)
+                                .build();
+                    }
+
+                    if (alreadyScanned) {
+                        return ImageVerificationResponseDTO.builder()
+                                .isMatch(true)
+                                .confidenceScore(confidenceScore)
+                                .message("Dit schilderij heb je al gevonden.")
+                                .paintingDetails(details)
+                                .build();
+                    }
 
                     return ImageVerificationResponseDTO.builder()
                             .isMatch(true)
                             .confidenceScore(confidenceScore)
-                            .message("Successfully identified painting!")
+                            .message("Correct gescand, maar dit is niet je huidige stop. Je voortgang blijft ongewijzigd.")
                             .paintingDetails(details)
                             .build();
 
