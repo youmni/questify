@@ -178,7 +178,14 @@ const StopScan = () => {
 
       try {
         const updated = await progressService.getForRoute(routeId);
-        setProgress(updated.data || null);
+        const updatedProgress = updated.data || null;
+        setProgress(updatedProgress);
+
+        if (data.isMatch && updatedProgress?.isCompleted) {
+          setTimeout(() => {
+            navigate(`/quest/museums/${museumId}/routes/${routeId}/complete`);
+          }, 1800);
+        }
       } catch {
         // no-op
       }

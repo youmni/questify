@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link, Navigate } from "react-router-dom";
 import museumService from "../services/museumService";
 import paintingService from "../services/paintingService";
 import progressService from "../services/progressService";
@@ -102,78 +102,7 @@ const RouteDetail = () => {
       : 0;
 
   if (progress?.isCompleted) {
-    return (
-      <div className="min-h-screen bg-[#f4f1e9] text-[#2c3e54] px-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <QuestNav museumId={museumId} routeId={routeId} />
-
-          <div className="bg-white border border-[#2c3e54]/10 rounded-3xl p-6 sm:p-8 shadow-[0_10px_40px_rgba(44,62,84,0.05)]">
-            <div className="flex flex-col items-center text-center mb-8">
-              <div className="w-20 h-20 rounded-full bg-[#2c3e54] text-[#f4f1e9] flex items-center justify-center text-4xl mb-4">
-                🏆
-              </div>
-              <p className="text-xs font-bold uppercase tracking-widest text-[#2c3e54]/60 mb-2">Route voltooid</p>
-              <h1 className="text-3xl font-bold text-[#2c3e54] mb-2">Gefeliciteerd!</h1>
-              <p className="text-sm text-[#2c3e54]/70 max-w-md">
-                Je hebt alle {progress.totalStops} schilderijen gevonden op de route <span className="font-semibold">{route?.name}</span>.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <div className="rounded-2xl border border-[#2c3e54]/10 bg-[#f4f1e9] p-4 text-center">
-                <p className="text-2xl font-bold text-[#2c3e54]">{progress.totalStops}</p>
-                <p className="text-xs text-[#2c3e54]/60 mt-0.5">Schilderijen</p>
-              </div>
-              <div className="rounded-2xl border border-[#2c3e54]/10 bg-[#f4f1e9] p-4 text-center">
-                <p className="text-2xl font-bold text-[#2c3e54]">100%</p>
-                <p className="text-xs text-[#2c3e54]/60 mt-0.5">Voltooid</p>
-              </div>
-              <div className="rounded-2xl border border-[#2c3e54]/10 bg-[#f4f1e9] p-4 text-center">
-                <p className="text-2xl font-bold text-[#2c3e54]">✓</p>
-                <p className="text-xs text-[#2c3e54]/60 mt-0.5">Klaar</p>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-[#2c3e54]/10 p-5 mb-6">
-              <p className="text-xs font-bold uppercase tracking-widest text-[#2c3e54]/60 mb-4">Gevonden schilderijen</p>
-              <div className="space-y-2">
-                {sortedStops.map((stop) => {
-                  const detail = hintsByPainting[stop.paintingId];
-                  const title = detail?.title || `Stop ${stop.sequenceNumber}`;
-                  const artist = detail?.artist || "";
-                  return (
-                    <div key={stop.routeStopId} className="flex items-center gap-3">
-                      <div className="w-7 h-7 rounded-full bg-[#2c3e54] text-[#f4f1e9] flex items-center justify-center shrink-0 text-xs font-bold">✓</div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-[#2c3e54] truncate">{title}</p>
-                        {artist && <p className="text-xs text-[#2c3e54]/60 truncate">{artist}</p>}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <Link
-                to="/"
-                className="w-full flex items-center justify-center gap-2 bg-[#2c3e54] hover:bg-[#233247] text-[#f4f1e9] font-bold py-4 rounded-xl transition-all text-center"
-              >
-                Terug naar home
-              </Link>
-              <button
-                type="button"
-                onClick={handleRestart}
-                disabled={restarting}
-                className="w-full border border-[#2c3e54]/20 hover:border-[#2c3e54]/40 text-[#2c3e54] font-semibold py-3.5 rounded-xl transition-all text-sm disabled:opacity-50 bg-white"
-              >
-                {restarting ? "Route wordt herstart..." : "Route opnieuw starten"}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <Navigate to={`/quest/museums/${museumId}/routes/${routeId}/complete`} replace />;
   }
 
   return (
