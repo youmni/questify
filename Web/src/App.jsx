@@ -18,6 +18,7 @@ import PaintingHintsAdmin from "./pages/admin/PaintingHintsAdmin";
 import StartPage from "./pages/StartPage";
 import MuseumsList from "./pages/MuseumsList";
 import RouteDetail from "./pages/RouteDetail";
+import RouteComplete from "./pages/RouteComplete";
 import StopScan from "./pages/StopScan";
 
 const App = () => {
@@ -50,6 +51,10 @@ const App = () => {
             <Route
               path="/quest/museums/:museumId/routes/:routeId"
               element={<RouteDetail />}
+            />
+            <Route
+              path="/quest/museums/:museumId/routes/:routeId/complete"
+              element={<RouteComplete />}
             />
             <Route
               path="/quest/museums/:museumId/routes/:routeId/stops/:stopNumber"

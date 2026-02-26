@@ -178,7 +178,14 @@ const StopScan = () => {
 
       try {
         const updated = await progressService.getForRoute(routeId);
-        setProgress(updated.data || null);
+        const updatedProgress = updated.data || null;
+        setProgress(updatedProgress);
+
+        if (data.isMatch && updatedProgress?.isCompleted) {
+          setTimeout(() => {
+            navigate(`/quest/museums/${museumId}/routes/${routeId}/complete`);
+          }, 1800);
+        }
       } catch {
         // no-op
       }
@@ -193,7 +200,10 @@ const StopScan = () => {
   const goToNextStop = () => {
     if (!stop || !totalStops) return;
     const nextNumber = (stop.sequenceNumber || 0) + 1;
-    if (nextNumber > totalStops) return;
+    if (nextNumber > totalStops) {
+      navigate(`/quest/museums/${museumId}/routes/${routeId}/complete`);
+      return;
+    }
     navigate(`/quest/museums/${museumId}/routes/${routeId}/stops/${nextNumber}`);
   };
 
@@ -271,11 +281,10 @@ const StopScan = () => {
               </button>
               <button
                 type="button"
-                disabled={isLastStop}
                 onClick={goToNextStop}
-                className="rounded-xl border border-[#2c3e54]/20 bg-white px-4 py-3 text-sm font-bold text-[#2c3e54] disabled:opacity-40 disabled:cursor-not-allowed"
+                className="rounded-xl border border-[#2c3e54]/20 bg-white px-4 py-3 text-sm font-bold text-[#2c3e54] hover:border-[#2c3e54]/40"
               >
-                Volgende stop →
+                {isLastStop ? "Route afronden →" : "Volgende stop →"}
               </button>
             </div>
 
