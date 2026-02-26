@@ -8,10 +8,13 @@ import com.questify.api.services.implementation.PaintingAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/paintings")
@@ -83,6 +86,30 @@ public class PaintingAdminController {
     public ResponseEntity<Void> deletePainting(@PathVariable Long id) {
         paintingAdminService.deletePainting(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * POST /api/admin/paintings/{id}/image
+     * Upload a reference image for a painting to MinIO
+     */
+    @AllowAdmin
+    @PostMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, String>> uploadPaintingImage(
+            @PathVariable Long id,
+            @RequestParam("image") MultipartFile image
+    ) {
+        if (image.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "No image provided"));
+        }
+        try {
+            String objectName = paintingAdminService.uploadPaintingImage(id, image);
+            return ResponseEntity.ok(Map.of("objectName", objectName, "message", "Image uploaded successfully"));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to upload image: " + e.getMessage()));
+        }
     }
 
 }

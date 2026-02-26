@@ -8,6 +8,13 @@ const paintingAdminService = {
   update: (id, data) => api.put(`/admin/paintings/${id}`, data),
   remove: (id) => api.delete(`/admin/paintings/${id}`),
   addHint: (paintingId, data) => api.post(`/admin/paintings/${paintingId}/hints`, data),
+  uploadImage: (paintingId, file) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    return api.post(`/admin/paintings/${paintingId}/image`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
 };
 
 export default paintingAdminService;

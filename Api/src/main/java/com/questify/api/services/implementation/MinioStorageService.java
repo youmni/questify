@@ -1,6 +1,8 @@
 package com.questify.api.services.implementation;
 
 import io.minio.*;
+import io.minio.errors.ErrorResponseException;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,11 +28,17 @@ public class MinioStorageService {
     @Value("${minio.endpoint.extern}")
     private String externalEndpoint;
 
+    @PostConstruct
+    public void init() {
+        ensureBucketExists();
+    }
+
     /**
      * Download image from MinIO to temporary local file for OpenCV processing
      *
      * @param objectName Path in MinIO bucket
      * @return Local file path
+     * @throws IllegalStateException if the object does not exist in MinIO
      */
     public String downloadImageToTemp(String objectName) throws Exception {
 
@@ -48,6 +56,15 @@ public class MinioStorageService {
             log.info("Downloaded image from MinIO: {} -> {}", objectName, tempFile);
             return tempFile.toString();
 
+        } catch (ErrorResponseException e) {
+            Files.deleteIfExists(tempFile);
+            if ("NoSuchKey".equals(e.errorResponse().code())) {
+                throw new IllegalStateException(
+                        "Geen referentieafbeelding gevonden voor dit schilderij (object: " + objectName + "). " +
+                        "Upload eerst een afbeelding via het admin paneel."
+                );
+            }
+            throw e;
         } catch (Exception e) {
             Files.deleteIfExists(tempFile);
             throw e;

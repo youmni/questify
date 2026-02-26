@@ -3,7 +3,6 @@ import { useNavigate, Link } from "react-router-dom";
 import authService from "../../services/authService";
 import { useAuth } from "../../hooks/useAuth";
 
-// Iconen (Nu donkerblauw #2c3e54)
 const MailIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>;
 const LockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
 const ArrowRightIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>;
@@ -29,9 +28,9 @@ const Login = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!form.email || form.email.trim() === "") newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(form.email.trim())) newErrors.email = "Email is invalid";
-    if (!form.password || form.password === "") newErrors.password = "Password is required";
+    if (!form.email || form.email.trim() === "") newErrors.email = "E-mailadres is vereist";
+    else if (!/\S+@\S+\.\S+/.test(form.email.trim())) newErrors.email = "E-mailadres is ongeldig";
+    if (!form.password || form.password === "") newErrors.password = "Wachtwoord is vereist";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -50,15 +49,13 @@ const Login = () => {
       setUser(me.data || null);
       navigate("/");
     } catch (error) {
-      setErrors({ submit: error?.response?.data?.message || "Login failed" });
+      setErrors({ submit: error?.response?.data?.message || "Inloggen mislukt" });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-      // ACHTERGROND: #f4f1e9
-      // TEKST: #2c3e54
       <div className="min-h-screen bg-[#f4f1e9] text-[#2c3e54] flex items-center justify-center p-4 relative overflow-hidden font-sans">
 
         <style>{`
@@ -66,14 +63,12 @@ const Login = () => {
         .animate-slide-up { animation: slideUpFade 0.6s ease-out forwards; }
       `}</style>
 
-        {/* Decoratie Blobs (Blauw #2c3e54 met lage opacity) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#2c3e54]/5 rounded-full blur-[100px]"></div>
           <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[#2c3e54]/5 rounded-full blur-[100px]"></div>
         </div>
 
         <div className={`w-full max-w-md relative z-10 opacity-0 ${isVisible ? 'animate-slide-up' : ''}`}>
-          {/* CARD: Wit (#ffffff) voor contrast, met subtiele blauwe schaduw */}
           <div className="bg-white border border-[#2c3e54]/10 rounded-3xl p-8 shadow-[0_10px_40px_rgba(44,62,84,0.05)]">
 
             <div className="text-center mb-8">
@@ -81,8 +76,8 @@ const Login = () => {
                 <div className="w-8 h-8 bg-[#2c3e54] rounded-lg shadow-lg group-hover:scale-105 transition-transform flex items-center justify-center text-white font-bold">Q</div>
                 <span className="text-xl font-bold tracking-wider text-[#2c3e54]">QUESTIFY</span>
               </Link>
-              <h2 className="text-3xl font-bold text-[#2c3e54] mb-2">Welcome Back</h2>
-              <p className="text-[#2c3e54]/60">Sign in to your account</p>
+              <h2 className="text-3xl font-bold text-[#2c3e54] mb-2">Welkom terug</h2>
+              <p className="text-[#2c3e54]/60">Log in op je account</p>
             </div>
 
             {errors.submit && (
@@ -94,19 +89,18 @@ const Login = () => {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-1">
-                <label htmlFor="email" className="text-sm font-medium text-[#2c3e54] ml-1">Email address</label>
+                <label htmlFor="email" className="text-sm font-medium text-[#2c3e54] ml-1">E-mailadres</label>
                 <div className="relative group">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2c3e54]/40 group-focus-within:text-[#2c3e54] transition-colors">
                     <MailIcon />
                   </div>
-                  {/* INPUT: Achtergrond #f4f1e9 (subtiel donkerder dan wit), Border #2c3e54 */}
                   <input
                       id="email"
                       name="email"
                       type="email"
                       value={form.email}
                       onChange={handleChange}
-                      placeholder="explorer@questify.com"
+                      placeholder="verkenner@questify.com"
                       className={`w-full bg-[#f4f1e9]/50 border ${
                           errors.email ? 'border-red-500' : 'border-[#2c3e54]/20 focus:border-[#2c3e54]'
                       } rounded-xl py-3.5 pl-12 pr-4 text-[#2c3e54] placeholder-[#2c3e54]/30 focus:outline-none focus:ring-1 focus:ring-transparent transition-all`}
@@ -117,9 +111,9 @@ const Login = () => {
 
               <div className="space-y-1">
                 <div className="flex justify-between items-center ml-1">
-                  <label htmlFor="password" className="text-sm font-medium text-[#2c3e54]">Password</label>
+                  <label htmlFor="password" className="text-sm font-medium text-[#2c3e54]">Wachtwoord</label>
                   <Link to="/auth/password-reset" className="text-xs text-[#2c3e54]/70 hover:text-[#2c3e54] font-bold transition-colors">
-                    Forgot password?
+                    Wachtwoord vergeten?
                   </Link>
                 </div>
                 <div className="relative group">
@@ -141,20 +135,19 @@ const Login = () => {
                 {errors.password && <p className="ml-1 text-xs text-red-500">{errors.password}</p>}
               </div>
 
-              {/* KNOP: Achtergrond #2c3e54, Tekst wit (of beige #f4f1e9) */}
               <button
                   type="submit"
                   disabled={isLoading}
                   className="w-full py-4 rounded-xl font-bold text-[#f4f1e9] bg-[#2c3e54] shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
               >
-                {isLoading ? (<><LoaderIcon /> Signing in...</>) : (<>Sign in <ArrowRightIcon /></>)}
+                {isLoading ? (<><LoaderIcon /> Bezig met inloggen...</>) : (<>Inloggen <ArrowRightIcon /></>)}
               </button>
             </form>
 
             <div className="mt-8 text-center text-sm text-[#2c3e54]/60">
-              Don't have an account?{' '}
+              Nog geen account?{' '}
               <Link to="/auth/register" className="text-[#2c3e54] font-bold hover:underline transition-all">
-                Register here
+                Hier registreren
               </Link>
             </div>
 
