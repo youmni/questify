@@ -1,6 +1,7 @@
 package com.questify.api.services.implementation;
 
 import com.questify.api.config.security.JwtService;
+import com.questify.api.model.enums.WebhookEventType;
 import com.questify.api.repository.*;
 import com.questify.api.dto.request.*;
 import com.questify.api.dto.response.AuthResponseDTO;
@@ -10,6 +11,7 @@ import com.questify.api.mapper.UserMapper;
 import com.questify.api.model.*;
 import com.questify.api.model.enums.UserType;
 import com.questify.api.services.contract.*;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final JwtService jwtService;
     private final ResetPasswordRepository resetPasswordRepository;
+    private final WebhookService webhookService;
 
     @Override
     public UserDTO register(RegistrationDTO registrationDTO) {
@@ -48,6 +51,13 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         emailService.sendActivationEmail(user, user.getActivationToken());
+
+        webhookService.fire(WebhookEventType.USER_REGISTERED, Map.of(
+                "userId", user.getId(),
+                "email", user.getEmail(),
+                "firstName", user.getFirstName(),
+                "lastName", user.getLastName()
+        ));
 
         return userMapper.toDTO(user);
     }
