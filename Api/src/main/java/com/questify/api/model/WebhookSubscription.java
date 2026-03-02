@@ -19,14 +19,14 @@ public class WebhookSubscription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 500)
+    @Column(nullable = false, length = 2048)
     private String url;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private WebhookEventType eventType;
 
-    @Column(nullable = false, length = 100)
+    @Column(length = 255)
     private String description;
 
     @Builder.Default

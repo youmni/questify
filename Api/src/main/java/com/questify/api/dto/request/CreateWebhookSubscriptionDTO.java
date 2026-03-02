@@ -10,12 +10,11 @@ import org.hibernate.validator.constraints.URL;
 public class CreateWebhookSubscriptionDTO {
 
     @NotBlank
-    @URL
+    @URL(regexp = "https?://.*")
     private String url;
 
     @NotNull
     private WebhookEventType eventType;
 
-    @NotBlank
     private String description;
 }
