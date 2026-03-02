@@ -2,6 +2,7 @@ package com.questify.api.services.implementation;
 
 import com.questify.api.dto.response.*;
 import com.questify.api.model.*;
+import com.questify.api.model.enums.WebhookEventType;
 import com.questify.api.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -21,6 +23,7 @@ public class RouteProgressService {
     private final UserPaintingScanRepository scanRepository;
     private final RouteRepository routeRepository;
     private final UserRepository userRepository;
+    private final WebhookService webhookService;
 
     /**
      * Get or create user's progress for a route
@@ -78,6 +81,12 @@ public class RouteProgressService {
             progress.setCompleted(true);
             progress.setCompletedAt(LocalDateTime.now());
             log.info("User {} completed route {}", userId, routeId);
+            webhookService.fire(WebhookEventType.ROUTE_COMPLETED, Map.of(
+                "userId", userId,
+                "routeId", routeId,
+                "routeName", route.getName(),
+                "totalStops", totalStops
+            ));
         } else {
             // Move to next stop
             progress.setCurrentStopNumber(currentStop + 1);
