@@ -22,4 +22,6 @@ public interface UserRouteProgressRepository
             Long userId,
             boolean isCompleted
     );
+
+    List<UserRouteProgress> findAllByIsCompleted(boolean isCompleted);
 }
