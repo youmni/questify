@@ -14,6 +14,7 @@ const WebhooksAdmin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState(emptyForm);
+  const [testResults, setTestResults] = useState({});
 
   const load = async () => {
     setLoading(true); setError("");
@@ -55,6 +56,17 @@ const WebhooksAdmin = () => {
       await load();
     } catch (e) { setError("Status bijwerken mislukt: " + e.message); }
     finally { setLoading(false); }
+  };
+
+  const handleTest = async (webhook) => {
+    setTestResults((prev) => ({ ...prev, [webhook.id]: { loading: true } }));
+    try {
+      const res = await webhookAdminService.test(webhook.id);
+      setTestResults((prev) => ({ ...prev, [webhook.id]: res.data }));
+    } catch (e) {
+      const data = e.response?.data;
+      setTestResults((prev) => ({ ...prev, [webhook.id]: data || { success: false, status: 0, body: e.message } }));
+    }
   };
 
   return (
@@ -117,8 +129,11 @@ const WebhooksAdmin = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#f0eae0]">
-                  {webhooks.map((wh) => (
-                    <tr key={wh.id} className="hover:bg-[#f4f0e8] transition-colors">
+                  {webhooks.map((wh) => {
+                    const tr = testResults[wh.id];
+                    return (
+                    <React.Fragment key={wh.id}>
+                    <tr className="hover:bg-[#f4f0e8] transition-colors">
                       <td className="px-3 py-3 font-mono text-[#1c2e45] font-semibold">{wh.eventType}</td>
                       <td className="px-3 py-3 text-[#6a7a60] max-w-[180px] truncate" title={wh.description || wh.url}>
                         {wh.description || <span className="text-[#b0a898] italic">geen beschrijving</span>}
@@ -129,6 +144,10 @@ const WebhooksAdmin = () => {
                         </span>
                       </td>
                       <td className="px-3 py-3 text-right space-x-3">
+                        <button onClick={() => handleTest(wh)} disabled={tr?.loading}
+                          className="text-[#c4952c] hover:text-[#a37820] font-semibold transition-colors disabled:opacity-50">
+                          {tr?.loading ? "Testen..." : "Testen"}
+                        </button>
                         <button onClick={() => toggleActive(wh)} className="text-[#6a7a60] hover:text-[#1c2e45] font-semibold transition-colors">
                           {wh.active ? "Deactiveren" : "Activeren"}
                         </button>
@@ -137,7 +156,19 @@ const WebhooksAdmin = () => {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                    {tr && !tr.loading && (
+                      <tr>
+                        <td colSpan={4} className="px-3 pb-3">
+                          <div className={`rounded-lg px-4 py-3 text-xs font-mono ${tr.success ? "bg-green-50 border border-green-200 text-green-800" : "bg-red-50 border border-red-200 text-red-800"}`}>
+                            <span className="font-bold">{tr.success ? "Succes" : "Mislukt"}</span>
+                            {" — HTTP "}<span className="font-bold">{tr.status}</span>
+                            {tr.body && <div className="mt-1 text-[10px] break-all opacity-80">{tr.body}</div>}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    </React.Fragment>
+                  )})}
                 </tbody>
               </table>
             </div>

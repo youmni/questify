@@ -5,6 +5,7 @@ import com.questify.api.dto.request.CreateWebhookSubscriptionDTO;
 import com.questify.api.dto.response.WebhookSubscriptionDTO;
 import com.questify.api.model.WebhookSubscription;
 import com.questify.api.repository.WebhookSubscriptionRepository;
+import com.questify.api.services.implementation.WebhookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/webhooks")
@@ -20,6 +22,7 @@ import java.util.List;
 public class WebhookAdminController {
 
     private final WebhookSubscriptionRepository subscriptionRepository;
+    private final WebhookService webhookService;
 
     @GetMapping
     public List<WebhookSubscriptionDTO> getAll() {
@@ -61,6 +64,14 @@ public class WebhookAdminController {
                 .orElseThrow(() -> new RuntimeException("Webhook subscription not found"));
         subscription.setActive(true);
         return ResponseEntity.ok(toDTO(subscriptionRepository.save(subscription)));
+    }
+
+    @PostMapping("/{id}/test")
+    public ResponseEntity<Map<String, Object>> test(@PathVariable Long id) {
+        WebhookSubscription subscription = subscriptionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Webhook subscription not found"));
+        Map<String, Object> result = webhookService.test(subscription);
+        return ResponseEntity.ok(result);
     }
 
     private WebhookSubscriptionDTO toDTO(WebhookSubscription s) {
