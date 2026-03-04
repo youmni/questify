@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import AdminNav from "../../components/AdminNav";
 import webhookAdminService from "../../services/webhookAdminService";
 
-const EVENT_TYPES = ["ROUTE_COMPLETED", "PAINTING_SCANNED", "USER_REGISTERED"];
+const EVENT_TYPES = ["ROUTE_COMPLETED", "PAINTING_SCANNED", "USER_REGISTERED", "LEADERBOARD_UPDATE", "ROUTE_STARTED"];
 
 const emptyForm = { url: "", eventType: "ROUTE_COMPLETED", description: "" };
 
