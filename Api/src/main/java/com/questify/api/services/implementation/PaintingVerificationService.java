@@ -32,6 +32,7 @@ public class PaintingVerificationService {
     private final UserRepository userRepository;
     private final WebhookService webhookService;
     private final EmailService emailService;
+    private final ClaudeService claudeService;
 
     /**
      * Main method: Verify user's photo matches the current painting in their route
@@ -113,13 +114,18 @@ public class PaintingVerificationService {
                         recordSuccessfulScan(userId, routeId, paintingId, confidenceScore);
                         RouteProgressDTO updatedProgress = progressService.advanceToNextStop(userId, routeId);
 
+                        String funFact = claudeService.getPaintingFunFact(
+                                painting.getTitle(), painting.getArtist()
+                        );
+
                         webhookService.fire(WebhookEventType.PAINTING_SCANNED, Map.of(
                                 "userId", userId,
                                 "routeId", routeId,
                                 "paintingId", paintingId,
                                 "paintingTitle", painting.getTitle(),
                                 "paintingArtist", painting.getArtist(),
-                                "confidenceScore", confidenceScore
+                                "confidenceScore", confidenceScore,
+                                "funFact", funFact
                         ));
 
                         if (updatedProgress.isCompleted()) {
