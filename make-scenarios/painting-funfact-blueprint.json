@@ -1,0 +1,86 @@
+{
+  "name": "Questify - Schilderij Fun Fact via Claude",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": "VERVANG_MET_JOUW_WEBHOOK_ID",
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "restore": {
+          "parameters": {
+            "hook": { "label": "Questify PAINTING_SCANNED" }
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": true,
+        "useNewZLibDeCompress": true
+      },
+      "mapper": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "serializeUrl": false,
+        "method": "post",
+        "headers": [
+          {
+            "name": "x-api-key",
+            "value": "VERVANG_MET_JOUW_ANTHROPIC_API_KEY"
+          },
+          {
+            "name": "anthropic-version",
+            "value": "2023-06-01"
+          },
+          {
+            "name": "content-type",
+            "value": "application/json"
+          }
+        ],
+        "bodyType": "raw",
+        "parseResponse": true,
+        "contentType": "json",
+        "body": "{\"model\": \"claude-haiku-4-5-20251001\", \"max_tokens\": 300, \"messages\": [{\"role\": \"user\", \"content\": \"Geef 2 korte, interessante fun facts over het schilderij \\\"{{1.paintingTitle}}\\\" van {{1.paintingArtist}}. Schrijf in het Nederlands. Geen inleiding, alleen de 2 feiten, elk op een nieuwe regel beginnend met een cijfer.\"}]}"
+      },
+      "metadata": {
+        "designer": { "x": 300, "y": 0 }
+      }
+    },
+    {
+      "id": 3,
+      "module": "gmail:ActionSendEmail",
+      "version": 1,
+      "parameters": {
+        "account": "VERVANG_MET_JOUW_GMAIL_CONNECTION_ID"
+      },
+      "mapper": {
+        "to": "VERVANG_MET_EMAIL_VAN_GEBRUIKER",
+        "subject": "Wist je dit over {{1.paintingTitle}}? 🎨",
+        "content": "<h2>Je hebt {{1.paintingTitle}} gescand!</h2><p><em>van {{1.paintingArtist}}</em></p><br><h3>Wist je dit?</h3><p>{{2.data.content[].text}}</p>",
+        "contentType": "html"
+      },
+      "metadata": {
+        "designer": { "x": 600, "y": 0 }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false
+    }
+  }
+}

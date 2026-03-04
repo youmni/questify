@@ -11,5 +11,4 @@ public class ImageVerificationResponseDTO {
     private double confidenceScore;
     private String message;
     private PaintingDetailDTO paintingDetails; // Only returned if match = true
-    private String funFact; // Claude-generated fun fact, only on first successful scan
 }
