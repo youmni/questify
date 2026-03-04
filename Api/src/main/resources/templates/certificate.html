@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Route Certificaat</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            background-color: #f5f0e8;
+            color: #2c2c2c;
+            margin: 0;
+            padding: 0;
+        }
+        .wrapper {
+            padding: 40px 20px;
+            background-color: #f5f0e8;
+        }
+        .certificate {
+            max-width: 620px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 3px solid #8b6914;
+            border-radius: 4px;
+            padding: 50px 60px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .ornament {
+            font-size: 28px;
+            color: #8b6914;
+            letter-spacing: 8px;
+            margin-bottom: 10px;
+        }
+        .title {
+            font-size: 13px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #8b6914;
+            margin-bottom: 6px;
+        }
+        .certificate-heading {
+            font-size: 34px;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin: 10px 0 30px 0;
+            letter-spacing: 2px;
+        }
+        .body-text {
+            font-size: 15px;
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+        .user-name {
+            font-size: 30px;
+            font-style: italic;
+            color: #1a1a1a;
+            border-bottom: 2px solid #8b6914;
+            display: inline-block;
+            padding-bottom: 6px;
+            margin: 10px 0 20px 0;
+        }
+        .route-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c5f2e;
+            margin: 8px 0;
+        }
+        .museum-name {
+            font-size: 15px;
+            color: #666;
+            margin: 4px 0;
+        }
+        .stops-badge {
+            display: inline-block;
+            background-color: #2c5f2e;
+            color: #ffffff;
+            font-size: 13px;
+            padding: 6px 18px;
+            border-radius: 20px;
+            margin: 14px 0;
+            letter-spacing: 1px;
+        }
+        .date {
+            font-size: 13px;
+            color: #999;
+            margin-top: 20px;
+        }
+        .divider {
+            border: none;
+            border-top: 1px solid #d4b86a;
+            margin: 24px 0;
+        }
+        .footer-text {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="certificate">
+        <div class="ornament">✦ ✦ ✦</div>
+        <div class="title">Questify</div>
+        <div class="certificate-heading">Certificaat van Voltooiing</div>
+
+        <p class="body-text">Dit certificaat wordt uitgereikt aan</p>
+        <div class="user-name">{{userName}}</div>
+
+        <p class="body-text">voor het succesvol voltooien van</p>
+        <div class="route-name">{{routeName}}</div>
+        <div class="museum-name">{{museumName}}</div>
+
+        <div class="stops-badge">{{totalStops}} stops voltooid</div>
+
+        <hr class="divider">
+
+        <p class="date">Voltooid op {{completedAt}}</p>
+
+        <p class="footer-text">
+            Gefeliciteerd met het verkennen van dit museum! We hopen je snel weer te zien.
+        </p>
+        <div class="ornament" style="margin-top: 20px;">✦ ✦ ✦</div>
+    </div>
+</div>
+</body>
+</html>
