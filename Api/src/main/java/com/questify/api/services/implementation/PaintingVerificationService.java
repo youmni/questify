@@ -124,8 +124,7 @@ public class PaintingVerificationService {
                                 "paintingId", paintingId,
                                 "paintingTitle", painting.getTitle(),
                                 "paintingArtist", painting.getArtist(),
-                                "confidenceScore", confidenceScore,
-                                "funFact", funFact
+                                "confidenceScore", confidenceScore
                         ));
 
                         if (updatedProgress.isCompleted()) {
@@ -157,6 +156,7 @@ public class PaintingVerificationService {
                                 .confidenceScore(confidenceScore)
                                 .message("Successfully identified painting!")
                                 .paintingDetails(details)
+                                .funFact(funFact)
                                 .build();
                     }
 
