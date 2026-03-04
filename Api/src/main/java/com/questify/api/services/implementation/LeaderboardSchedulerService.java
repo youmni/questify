@@ -21,12 +21,12 @@ public class LeaderboardSchedulerService {
     private final UserRouteProgressRepository progressRepository;
     private final WebhookService webhookService;
 
-    /**
-     * Every Monday at 08:00 — fire weekly leaderboard to Make.com
-     */
-    @Scheduled(cron = "0 0 8 * * MON")
-    public void fireWeeklyLeaderboard() {
-        log.info("Firing weekly leaderboard update");
+        /**
+         * Every day at 20:00 (Europe/Brussels) — fire leaderboard to Make.com
+         */
+        @Scheduled(cron = "0 0 20 * * *", zone = "Europe/Brussels")
+        public void fireDailyLeaderboard() {
+                log.info("Firing daily leaderboard update");
 
         List<UserRouteProgress> completed = progressRepository.findAllByIsCompleted(true);
 
