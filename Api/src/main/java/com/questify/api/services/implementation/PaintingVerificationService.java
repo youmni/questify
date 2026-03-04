@@ -4,12 +4,18 @@ import com.questify.api.dto.response.ImageVerificationResponseDTO;
 import com.questify.api.dto.response.PaintingDetailDTO;
 import com.questify.api.dto.response.RouteProgressDTO;
 import com.questify.api.model.*;
+import com.questify.api.model.enums.WebhookEventType;
 import com.questify.api.repository.*;
+import com.questify.api.services.contract.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -24,6 +30,8 @@ public class PaintingVerificationService {
     private final UserPaintingScanRepository scanRepository;
     private final RouteRepository routeRepository;
     private final UserRepository userRepository;
+    private final WebhookService webhookService;
+    private final EmailService emailService;
 
     /**
      * Main method: Verify user's photo matches the current painting in their route
@@ -103,7 +111,40 @@ public class PaintingVerificationService {
                     // 5. Record and advance only when this is a new scan on the active stop
                     if (!alreadyScanned && isCurrentStopPainting) {
                         recordSuccessfulScan(userId, routeId, paintingId, confidenceScore);
-                        progressService.advanceToNextStop(userId, routeId);
+                        RouteProgressDTO updatedProgress = progressService.advanceToNextStop(userId, routeId);
+
+                        webhookService.fire(WebhookEventType.PAINTING_SCANNED, Map.of(
+                                "userId", userId,
+                                "routeId", routeId,
+                                "paintingId", paintingId,
+                                "paintingTitle", painting.getTitle(),
+                                "paintingArtist", painting.getArtist(),
+                                "confidenceScore", confidenceScore
+                        ));
+
+                        if (updatedProgress.isCompleted()) {
+                            webhookService.fire(WebhookEventType.ROUTE_COMPLETED, Map.of(
+                                    "userId", userId,
+                                    "routeId", routeId,
+                                    "routeName", updatedProgress.getRouteName(),
+                                    "totalStops", updatedProgress.getTotalStops()
+                            ));
+
+                            User user = userRepository.findById(userId)
+                                    .orElseThrow(() -> new RuntimeException("User not found"));
+                            Route route = routeRepository.findById(routeId)
+                                    .orElseThrow(() -> new RuntimeException("Route not found"));
+                            String museumName = route.getMuseum().getName();
+                            String completedAt = LocalDateTime.now()
+                                    .format(DateTimeFormatter.ofPattern("d MMMM yyyy 'om' HH:mm"));
+                            emailService.sendCertificateEmail(
+                                    user,
+                                    updatedProgress.getRouteName(),
+                                    museumName,
+                                    updatedProgress.getTotalStops(),
+                                    completedAt
+                            );
+                        }
 
                         return ImageVerificationResponseDTO.builder()
                                 .isMatch(true)

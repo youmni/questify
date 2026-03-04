@@ -2,6 +2,7 @@ package com.questify.api.services.implementation;
 
 import com.questify.api.dto.response.*;
 import com.questify.api.model.*;
+import com.questify.api.model.enums.WebhookEventType;
 import com.questify.api.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -21,6 +23,7 @@ public class RouteProgressService {
     private final UserPaintingScanRepository scanRepository;
     private final RouteRepository routeRepository;
     private final UserRepository userRepository;
+    private final WebhookService webhookService;
 
     /**
      * Get or create user's progress for a route
@@ -54,7 +57,15 @@ public class RouteProgressService {
 
         log.info("Created new route progress for user {} on route {}", userId, routeId);
 
-        return buildProgressDTO(progress);
+        RouteProgressDTO dto = buildProgressDTO(progress);
+        webhookService.fire(WebhookEventType.ROUTE_STARTED, Map.of(
+                "userId", userId,
+                "routeId", routeId,
+                "routeName", dto.getRouteName(),
+                "totalStops", dto.getTotalStops()
+        ));
+
+        return dto;
     }
 
     /**

@@ -77,4 +77,34 @@ public class EmailServiceImpl implements EmailService {
             throw new EmailSendingException("Failed to send password reset email", e);
         }
     }
+
+    @Override
+    @Async
+    public void sendCertificateEmail(User user, String routeName, String museumName, int totalStops, String completedAt) {
+        try {
+            ClassPathResource resource = new ClassPathResource("templates/certificate.html");
+
+            String html;
+            try (InputStream inputStream = resource.getInputStream()) {
+                html = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            }
+
+            String userName = user.getFirstName() + " " + user.getLastName();
+            html = html.replace("{{userName}}", userName);
+            html = html.replace("{{routeName}}", routeName);
+            html = html.replace("{{museumName}}", museumName);
+            html = html.replace("{{totalStops}}", String.valueOf(totalStops));
+            html = html.replace("{{completedAt}}", completedAt);
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setTo(user.getEmail());
+            helper.setSubject("Gefeliciteerd! Je hebt de route \"" + routeName + "\" voltooid");
+            helper.setText(html, true);
+            mailSender.send(message);
+
+        } catch (IOException | MessagingException e) {
+            throw new EmailSendingException("Failed to send certificate email", e);
+        }
+    }
 }
