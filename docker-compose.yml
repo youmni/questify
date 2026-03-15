@@ -1,9 +1,6 @@
 version: "3.9"
 
 services:
-  # --------------------
-  # MySQL
-  # --------------------
   db:
     image: mysql:8.0
     container_name: mysql
@@ -19,9 +16,6 @@ services:
     networks:
       - questify-network
 
-  # --------------------
-  # phpMyAdmin
-  # --------------------
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
@@ -29,7 +23,7 @@ services:
       - db
     environment:
       PMA_HOST: db
-      PMA_PORT: 3306  
+      PMA_PORT: 3306
       PMA_USER: ${MYSQL_USER}
       PMA_PASSWORD: ${MYSQL_PASSWORD}
     ports:
@@ -37,9 +31,6 @@ services:
     networks:
       - questify-network
 
-  # --------------------
-  # MinIO
-  # --------------------
   minio:
     image: minio/minio
     container_name: minio
@@ -55,9 +46,15 @@ services:
     networks:
       - questify-network
 
-  # --------------------
-  # Spring Boot Backend
-  # --------------------
+  clip-service:
+    container_name: clip
+    build:
+      context: ./ClipService
+    ports:
+      - "5000:5000"
+    networks:
+      - questify-network
+
   backend:
     container_name: springboot
     build:
@@ -65,6 +62,7 @@ services:
     depends_on:
       - db
       - minio
+      - clip-service
     environment:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
@@ -91,14 +89,13 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
+
+      CLIP_SERVICE_URL: ${CLIP_SERVICE_URL}
     ports:
       - "8080:8080"
     networks:
       - questify-network
 
-  # --------------------
-  # React Frontend
-  # --------------------
   frontend:
     container_name: react
     build:
@@ -113,16 +110,10 @@ services:
     networks:
       - questify-network
 
-# --------------------
-# Volumes
-# --------------------
 volumes:
   mysql_data:
   minio_data:
 
-# --------------------
-# Network
-# --------------------
 networks:
   questify-network:
     driver: bridge
