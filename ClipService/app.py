@@ -19,9 +19,12 @@ def compare():
         f1 = model.encode_image(img1)
         f2 = model.encode_image(img2)
 
-    score = torch.nn.functional.cosine_similarity(f1, f2).item()
-    # Cosine similarity: 0.0-1.0, normaliseer naar jouw verwachte range
-    normalized = max(0.0, (score - 0.5) * 2)
+    raw_score = torch.nn.functional.cosine_similarity(f1, f2).item()
+    normalized = max(0.0, (raw_score - 0.5) * 2)
+
+    print(f"RAW cosine similarity: {raw_score}", flush=True)
+    print(f"NORMALIZED score: {normalized}", flush=True)
+
     return jsonify({"score": normalized})
 
 if __name__ == "__main__":
